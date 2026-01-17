@@ -1,24 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Vehicle Health Dashboard</title>
+
+    <!-- Link external CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
-    <h1>Vehicle Health Dashboard</h1>
 
-    <button onclick="loadData()">Refresh Data</button>
+    <!-- Animated Flares -->
+    <div class="flare one"></div>
+    <div class="flare two"></div>
+    <div class="flare three"></div>
 
-    <pre id="output">Click "Refresh Data" to load vehicle data</pre>
+    <!-- Dashboard Card -->
+    <div class="dashboard">
+        <h1>Vehicle Health Dashboard</h1>
+
+        <div class="timestamp" id="time">Last Update: --</div>
+
+        <<div class="item">
+    Speed: <span id="speedText">--</span>
+    <div class="bar">
+        <div class="bar-fill speed-fill" id="speedBar"></div>
+    </div>
+</div>
+
+<div class="item">
+    Battery: <span id="batteryText">--</span>
+    <div class="bar">
+        <div class="bar-fill battery-fill" id="batteryBar"></div>
+    </div>
+</div>
+
+        <div class="item" id="tyre">Tyre Pressure: --</div>
+
+        <div class="health" id="health">Health Score: --</div>
+        <div class="item" id="alerts">Status: --</div>
+
+        <button onclick="loadData()">Manual Refresh</button>
+    </div>
 
     <script>
         function loadData() {
             fetch("/data")
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("output").innerText =
-                        JSON.stringify(data, null, 2);
+
+                    document.getElementById("time").innerText =
+                        "Last Update: " + data.vehicle_data.timestamp;
+
+                    document.getElementById("speedText").innerText =
+    data.vehicle_data.speed + " km/h";
+
+document.getElementById("batteryText").innerText =
+    data.vehicle_data.battery + " %";
+
+document.getElementById("speedBar").style.width =
+    (data.vehicle_data.speed / 120) * 100 + "%";
+
+document.getElementById("batteryBar").style.width =
+    data.vehicle_data.battery + "%";
+
+
+                    document.getElementById("tyre").innerText =
+                        "Tyre Pressure: " + data.vehicle_data.tyre_pressure + " PSI";
+
+                    document.getElementById("health").innerText =
+                        "Health Score: " + data.health_score + " / 100";
+
+                    if (data.health_score >= 70) {
+                        document.getElementById("health").className = "health healthy";
+                    } else {
+                        document.getElementById("health").className = "health warning";
+                    }
+
+                    if (data.alerts.length > 0) {
+                        document.getElementById("alerts").innerText =
+                            "Alerts: " + data.alerts.join(", ");
+                    } else {
+                        document.getElementById("alerts").innerText =
+                            "Status: Vehicle is healthy";
+                    }
                 });
         }
+
+        // Auto-refresh every 3 seconds
+       loadData();                // initial fetch
+        setInterval(loadData, 3000);
+
     </script>
+
 </body>
 </html>

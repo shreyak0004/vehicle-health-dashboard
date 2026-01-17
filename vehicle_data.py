@@ -1,37 +1,37 @@
+from datetime import datetime
+
 import random
-import time
+
+from datetime import datetime
+import random
 
 def generate_vehicle_data():
     return {
-        "speed": random.randint(0, 120),          # km/h
-        "battery": random.randint(10, 100),       # %
-        "tyre_pressure": random.randint(24, 36)   # PSI
+        "speed": random.randint(0, 120),
+        "battery": random.randint(10, 100),
+        "tyre_pressure": random.randint(24, 36),
+        "timestamp": datetime.now().strftime("%H:%M:%S")
     }
+
+
 
 def check_vehicle_health(data):
     alerts = []
+    score = 100
 
     if data["battery"] < 20:
         alerts.append("Low Battery")
+        score -= 30
 
     if data["tyre_pressure"] < 28:
         alerts.append("Low Tyre Pressure")
+        score -= 30
 
     if data["speed"] > 100:
         alerts.append("Over Speeding")
+        score -= 20
 
-    return alerts
+    if score < 0:
+        score = 0
 
-while True:
-    vehicle_data = generate_vehicle_data()
-    alerts = check_vehicle_health(vehicle_data)
-
-    print("Vehicle Data:", vehicle_data)
-
-    if alerts:
-        print("ALERTS:", alerts)
-    else:
-        print("Status: Vehicle is healthy")
-
-    print("-" * 40)
-    time.sleep(2)
+    return alerts, score
