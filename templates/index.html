@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle Health Dashboard</title>
+</head>
+<body>
+    <h1>Vehicle Health Dashboard</h1>
+
+    <button onclick="loadData()">Refresh Data</button>
+
+    <pre id="output">Click "Refresh Data" to load vehicle data</pre>
+
+    <script>
+        function loadData() {
+            fetch("/data")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("output").innerText =
+                        JSON.stringify(data, null, 2);
+                });
+        }
+    </script>
+</body>
+</html>
