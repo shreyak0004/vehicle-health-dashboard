@@ -4,74 +4,45 @@
 [![Flask](https://img.shields.io/badge/framework-Flask-black.svg)](https://flask.palletsprojects.com/)
 [![Tests](https://img.shields.io/badge/tests-62%20passed%20(100%25)-brightgreen.svg)](https://docs.pytest.org/)
 [![Model](https://img.shields.io/badge/model-Qwen2.5--0.5B--Instruct%20(GGUF)-orange.svg)](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-VehicleGPT is an offline, on-device natural-language vehicle health, telemetry, and diagnostics assistant built for automotive cockpits and service engineers. It unifies high-frequency multi-bus vehicle telemetry (CAN/CAN-FD, SOME/IP, Android Automotive VHAL, QNX syslog, ADAS, and UDS Diagnostics) with an offline Small Language Model (SLM), delivering accurate conversational intelligence without cloud dependency.
-
----
-
-## 💡 Core Philosophy
-
-> **"The database and deterministic analytics establish the facts. The local language model explains those facts; it must never manufacture them."**
-
-In vehicle safety, hallucination is unacceptable. VehicleGPT guarantees 100% factual fidelity by routing every telemetry question through deterministic SQL analytics and safety boundaries before synthesizing natural language responses.
+An offline, on-device natural-language vehicle health and diagnostics assistant for automotive cockpits and service engineers. VehicleGPT bridges automotive bus telemetry with an edge Small Language Model (SLM), providing factual, conversational diagnostic intelligence without cloud dependency.
 
 ---
 
 ## 🚀 Key Features
 
-- **⚡ Factual & Deterministic Analytics**:
-  - Exact calculations for speed, power, energy consumption ($Wh/km$), battery state-of-charge ($SOC$), and thermal ranges.
-  - Granular driving-mode comparisons (e.g., City vs. Highway energy efficiency and temperature delta).
-  - Explicit notification for unavailable telemetry signals (e.g., tyre pressure) rather than hallucinatory estimations.
-
-- **🛡️ Read-Only Safety Perimeter (ISO 26262 compliant boundaries)**:
-  - Strict guard refusal against any control or actuation requests (e.g., *"turn off headlights"*, *"disable traction control"*).
-  - Temporal disclaimers for diagnostic event analysis to distinguish root cause from downstream symptoms.
-
-- **🔌 Unified Vehicle Ingestion Pipeline**:
-  - Normalized internal schema (`NormalizedTelemetry`, `NormalizedEvent`) accepting data from diverse vehicle buses:
-    - **CAN / CAN-FD**: Powertrain & chassis signals
-    - **SOME/IP**: Service-oriented Ethernet payloads
-    - **Android Automotive OS (AAOS) VHAL**: Infotainment & vehicle properties
-    - **QNX Syslog**: Operating system & thermal warning events
-    - **UDS / OBD-II Diagnostics**: Active DTC fault codes
-    - **ADAS & Camera Metadata**: Forward-collision warnings & lane assist events
-
-- **🧠 Offline Edge SLM (Zero-Cloud)**:
-  - Powered by **Qwen2.5-0.5B-Instruct** 4-bit quantized (`q4_k_m`) via `llama-cpp-python`.
-  - Runs with 2 threads within a tiny ~560 MB active memory footprint (well within the 2.0 GB embedded budget).
-  - Fallback deterministic responses under 2 ms when offline weights are not initialized.
-
-- **🎨 Modern Luxury Cockpit Interface**:
-  - **Sleek Obsidian Vehicle Silhouette**: Dark car body aesthetic with high contrast across both light and dark themes.
-  - **Dynamic Theme Switcher**: Toggle between Dark Luxury (Charcoal & Copper) and Clean Light Mode with persistent `localStorage` preference.
-  - **Dynamic Vector Telemetry Lines**: SVG connection lines that dynamically bridge live telemetry cards directly to vehicle hotspots across all screen resolutions.
-  - **Unified Workspace Controls**: Clean, single minimize/expand toggle for uncluttered cockpit operation.
-  - **Real-Time Gauges**: Live speed, battery SOC, battery temperature, and energy metrics with live historical trend charts.
+- **⚡ Deterministic Grounded Analytics**: Zero hallucination guarantee. Computes exact averages, energy consumption ($Wh/km$), battery state-of-charge ($SOC$), and mode comparisons via deterministic SQL before language model synthesis.
+- **🛡️ ISO 26262 Read-Only Safety Perimeter**: Strictly blocks vehicle control or actuation commands (e.g., *"turn off headlights"*) and explicitly reports unmonitored signals (e.g., tyre pressure) rather than fabricating answers.
+- **🔌 Unified Telemetry Ingestion**: Common internal schema accepting simulated scenario streams and pre-recorded trips now, with plug-and-play adapter interfaces for vehicle buses.
+- **🧠 Offline Edge SLM**: Runs locally via `llama-cpp-python` with **Qwen2.5-0.5B-Instruct** (4-bit GGUF) on 2 CPU threads within a ~560 MB RAM footprint (well under the 2 GB embedded budget).
+- **🎨 Modern Luxury Cockpit UI**: Features a sleek obsidian vehicle silhouette in both light and dark themes, dynamic vector lines connecting telemetry cards directly to vehicle sensor hotspots, and a single-toggle collapsible layout.
 
 ---
 
-## 🏛️ Architecture Overview
+## 🏛️ Architecture & Data Flow
 
 ```
 +--------------------------------------------------------------------------------------------------+
 |                                    VEHICLE DATA SOURCES                                          |
-|  [CAN / CAN-FD]   [SOME/IP]   [Android VHAL]   [QNX Syslog]   [ADAS Events]   [Camera Metadata]  |
+|                                                                                                  |
+|   [Active Simulated Inputs]                      [Planned Hardware Inputs (Adapter Ready)]       |
+|   - Real-time Scenario Simulator                 - Physical CAN / CAN-FD Bus Transceiver         |
+|   - Recorded Trip CSV Replay                     - SOME/IP Ethernet Services                     |
+|                                                  - Android Automotive VHAL (AIDL)                |
+|                                                  - QNX Syslog & Diagnostic UDS Dongle            |
 +-----------------------------------+--------------------------------------------------------------+
                                     |
                                     v
 +--------------------------------------------------------------------------------------------------+
-|                                  SOURCE-SPECIFIC ADAPTERS                                        |
+|                                 SOURCE-SPECIFIC ADAPTERS                                         |
 |  ingestion/adapters/ (CAN, SOME/IP, VHAL, QNX, ADAS, Camera, Diagnostics)                       |
 +-----------------------------------+--------------------------------------------------------------+
                                     |
                                     v
 +--------------------------------------------------------------------------------------------------+
 |                          NORMALIZATION & VALIDATION ENGINE                                       |
-|  - Ingestion Pipeline: Range bounds checking & unit normalization                                |
-|  - Common Internal Schema: NormalizedTelemetry, NormalizedEvent                                  |
-|  - Provenance tagging (CAN, SOME/IP, VHAL, QNX, ADAS, CAMERA, DIAGNOSTICS)                       |
+|  - Range bounds checking, unit normalization, and provenance tracking                            |
+|  - Common Schema: NormalizedTelemetry, NormalizedEvent                                          |
 +-----------------------------------+--------------------------------------------------------------+
                                     |
                                     v
@@ -84,11 +55,10 @@ In vehicle safety, hallucination is unacceptable. VehicleGPT guarantees 100% fac
                                     v (Read-Only Connection for Safety)
 +--------------------------------------------------------------------------------------------------+
 |                        DETERMINISTIC RETRIEVAL & SAFETY ENGINE                                    |
-|  1. Time Range Parsing: relative (yesterday, last 7 days) and absolute dates                     |
-|  2. Safety Refusal Guard: blocks actuation/driving commands (ISO 26262 read-only)                |
-|  3. Unsupported Signal Guard: rejects missing signals without hallucination                      |
-|  4. Authoritative SQL Analytics: extremes, averages, trends, comparisons, anomalies, ramps       |
-|  5. Event Investigation: retrieves preceding window with temporal disclaimer                     |
+|  1. Time Range Parsing (relative & absolute dates)                                               |
+|  2. Safety Refusal Guard (blocks actuation commands)                                             |
+|  3. Unsupported Signal Guard (handles missing signals like tyre pressure without hallucinating)  |
+|  4. Authoritative SQL Analytics (extremes, averages, trends, comparisons, ramps)                 |
 +-----------------------------------+--------------------------------------------------------------+
                                     |
           +-------------------------+-------------------------+
@@ -106,90 +76,34 @@ In vehicle safety, hallucination is unacceptable. VehicleGPT guarantees 100% fac
                                             v
 +--------------------------------------------------------------------------------------------------+
 |                          CHARCOAL & COPPER DASHBOARD & CHATBOT                                    |
-|  - Dynamic SVG vectors tracking vehicle component hotspots across viewports                      |
+|  - Dynamic SVG vectors tracking vehicle component hotspots across screen sizes                   |
 |  - Single unified panel minimize toggle & responsive telemetry grid                              |
-|  - Persistent Light & Dark Theme switching                                                       |
-|  - Full historical analytics & multi-scenario simulation engine                                  |
+|  - Persistent Light & Dark Theme switching (localStorage)                                        |
 +--------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 📂 Project Directory Structure
+## 💻 Tech Stack
 
-```
-vehicle_project/
-├── analytics/                   # Deterministic SQL calculation engine
-│   ├── __init__.py
-│   └── queries.py               # City vs Highway comparison, averages, ramps, extremes
-├── api/                         # REST & Assistant endpoints
-│   ├── __init__.py
-│   └── chat_routes.py           # /api/chat query router & safety interceptor
-├── data/                        # Trip datasets & sample recordings
-│   ├── sample_recorded_trip.csv
-│   └── sample_simulated_trip.csv
-├── database/                    # Persistence layer
-│   ├── db.py                    # SQLite connection & schema initialization
-│   ├── schema.sql               # vehicle_readings & vehicle_events tables
-│   └── test_database_setup.py
-├── docs/                        # Complete technical documentation
-│   ├── EDGE_PERFORMANCE_REPORT.md
-│   └── PROJECT_COMPLETION_REPORT.md
-├── ingestion/                   # Multi-bus vehicle telemetry adapters
-│   ├── adapters/                # CAN, SOME/IP, VHAL, QNX, ADAS, Camera, Diagnostics
-│   ├── common_schema.py         # Normalized telemetry & event dataclasses
-│   ├── csv_importer.py          # Batch trip CSV loader
-│   ├── normalizer.py            # Unit conversion & boundary validation
-│   ├── pipeline.py              # Ingestion pipeline coordinator
-│   └── simulator.py             # Scenario generator (overheating, low-battery, cold-weather)
-├── llm/                         # Edge SLM integration
-│   ├── local_model.py           # llama-cpp-python wrapper with factual system prompts
-│   └── prompts.py               # Context construction & grounding templates
-├── models/                      # Offline GGUF weights directory
-│   └── README.md                # Download & quantization instructions
-├── static/                      # Frontend styles and assets
-│   ├── js/                      # Local Chart.js library
-│   └── styles.css               # Luxury charcoal & copper theme, light theme tokens, animations
-├── templates/                   # Cockpit templates
-│   ├── index.html               # Main interactive dashboard with dynamic SVG lines & chat
-│   └── analytics.html           # Dedicated analytics view
-├── tests/                       # Automated test suite (62 tests)
-│   ├── test_analytics.py
-│   ├── test_end_to_end_demo.py
-│   ├── test_ingestion_adapters.py
-│   ├── test_routing.py
-│   ├── test_safety.py
-│   ├── test_scenarios.py
-│   └── test_unified_ingestion.py
-├── app.py                       # Main Flask web application
-├── benchmark_edge_performance.py # Latency, memory, and throughput profiling
-├── requirements.txt             # Python dependencies
-└── README.md                    # Project landing documentation
-```
+- **Backend**: Python 3.10+, Flask, SQLite
+- **Edge AI**: `llama-cpp-python`, Qwen2.5-0.5B-Instruct (`q4_k_m` GGUF, 491 MB)
+- **Frontend**: Vanilla JavaScript, Chart.js, CSS3 (Charcoal & Copper design system, SVG vectors)
+- **Testing & Verification**: Pytest, automated edge performance benchmarks
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Installation and Run Steps
 
-### 1. Prerequisites
-- Python 3.10 or higher
-- Git
-
-### 2. Clone Repository
+### 1. Clone Repository & Install Dependencies
 ```bash
 git clone https://github.com/shreyak0004/vehicle-health-dashboard.git
 cd vehicle-health-dashboard
-```
-
-### 3. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Setup Offline SLM Model (Optional for Edge AI)
-The project includes a high-speed deterministic fallback that operates without any model download. To enable natural-language SLM synthesis via `llama-cpp`:
-
-Download `qwen2.5-0.5b-instruct-q4_k_m.gguf` (~491 MB) into the `models/` directory:
+### 2. Download Offline Model Weights (Optional)
+*The system includes instant deterministic fallback if no model is present. To enable local SLM synthesis:*
 ```bash
 # Windows PowerShell
 Invoke-WebRequest -Uri "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf" -OutFile "models/qwen2.5-0.5b-instruct-q4_k_m.gguf"
@@ -198,64 +112,74 @@ Invoke-WebRequest -Uri "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/r
 curl -L -o models/qwen2.5-0.5b-instruct-q4_k_m.gguf https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf
 ```
 
-### 5. Launch the Dashboard
+### 3. Run Application
 ```bash
 python app.py
 ```
-Open your browser and navigate to:
-```
-http://127.0.0.1:5000
-```
+Open **`http://127.0.0.1:5000`** in your browser.
 
 ---
 
-## 🧪 Testing & Verification
+## 💬 Sample Queries (Verified Working Examples)
 
-Run the full automated test suite containing 62 test cases covering unit tests, multi-adapter ingestion, deterministic analytics, edge safety guards, and end-to-end question routing:
+| User Query | Engine Handling | Verified Grounded Output |
+| :--- | :--- | :--- |
+| **"Compare city vs highway energy consumption"** | `analytics.queries.compare_city_vs_highway` | Computes exact average speeds ($km/h$), energy efficiency ($Wh/km$), battery temperature differences, and timeframe compared. |
+| **"What was the highest battery temperature yesterday?"** | `retrieval.query_engine.execute_query` | Returns exact peak recorded temperature (e.g. $48.2^\circ C$) with exact timestamp. |
+| **"What is my current tyre pressure?"** | `Unsupported Signal Guard` | *"Tyre pressure data is not currently monitored by the connected vehicle telemetry bus."* (Refuses to guess). |
+| **"Turn off headlights"** | `Safety Guard (ISO 26262)` | *"Refusal: VehicleGPT operates strictly in read-only diagnostic mode. Vehicle control commands cannot be executed."* |
+| **"Why did the battery overheat yesterday?"** | `retrieval.query_engine.investigate_event` | Identifies thermal spike timestamp, correlated high-discharge draw, and applies temporal root-cause disclaimer. |
 
+---
+
+## 🧪 Tests and Benchmarks (Actual Measured Results)
+
+### Test Suite
 ```bash
 pytest -v
 ```
+- **Results:** **62 / 62 passed (100%)** in 1.45s across unit, scenario, and routing tests.
 
-Expected output:
+### Measured Edge Performance (Dual-Core Embedded Profile)
+- **Active Memory (RSS):** **561 MB** (Target: $< 2048\text{ MB}$, **72.6% safety headroom**).
+- **Model Size on Disk:** **491 MB** (4-bit quantization).
+- **Deterministic SQL Retrieval:** **2.4 ms** average response time.
+- **Local SLM Generation:** **1.4 s** average latency on 2 CPU threads.
+
+---
+
+## ⚠️ Limitations & Future Work
+
+### Current Limitations
+- **Simulated Bus Telemetry**: Current telemetry stream is provided by the scenario simulator and recorded CSV files; physical CAN transceivers and Ethernet interfaces are modeled through adapter abstractions.
+- **Signal Scope**: Unmonitored signals (such as individual tire pressures and high-resolution motor inverter RPM) are intentionally not stored in the current schema and are handled via safety guardrails.
+- **Context Window**: SLM conversational history is kept concise to maintain the embedded sub-600 MB RAM budget.
+
+### Future Work
+- **Hardware Bus Binding**: Direct SocketCAN (`can0`) and Android Automotive AIDL VHAL integration on physical embedded test benches.
+- **Domain Fine-Tuning**: Fine-tuning SLM weights on standardized SAE OBD-II and ISO 14229 UDS diagnostic codebooks.
+- **Sensor Extension**: Expanding schema to support multi-zone TPMS and individual cell-level battery voltage telemetry.
+
+---
+
+## 📁 Project Directory Structure
+
 ```
-============================== 62 passed in 1.45s ==============================
+vehicle_project/
+├── analytics/         # Deterministic SQL calculation engine (comparisons, averages, ramps)
+├── api/               # /api/chat query router and safety guardrails
+├── data/              # Sample simulated and recorded vehicle trip datasets
+├── database/          # SQLite schema, connection manager, and test scripts
+├── docs/              # Comprehensive case study and edge performance reports
+├── ingestion/         # Normalized schema, CSV loader, scenario simulator & bus adapters
+├── llm/               # llama-cpp-python wrapper and factual prompting templates
+├── models/            # Offline GGUF model storage (README with setup guide)
+├── static/            # Dashboard styles, animations, and Chart.js assets
+├── templates/         # Cockpit dashboard HTML template
+├── tests/             # Automated test suite (62 test cases)
+├── app.py             # Main Flask server entrypoint
+├── requirements.txt   # Core Python dependencies
+└── README.md          # Project landing documentation
 ```
 
----
-
-## 📊 Sample Queries & Verified Responses
-
-| User Query | Engine Routing | Grounded Output |
-| :--- | :--- | :--- |
-| **"Compare city vs highway energy consumption"** | `analytics.queries.compare_city_vs_highway` | Returns exact average speed ($km/h$), energy efficiency ($Wh/km$), battery temperature differences, and time period analyzed. |
-| **"What is my current tyre pressure?"** | `Unsupported Signal Guard` | *"Tyre pressure data is not currently monitored by the connected vehicle telemetry bus."* (Zero hallucination) |
-| **"Turn off headlights"** | `Safety Guard (ISO 26262)` | *"Refusal: VehicleGPT operates strictly in read-only diagnostic mode. Vehicle control commands cannot be executed."* |
-| **"Why did the battery overheat yesterday?"** | `retrieval.query_engine.investigate_event` | Identifies thermal spike timestamp, correlated high-draw discharge, and provides temporal correlation disclaimer. |
-
----
-
-## 📈 Edge Performance Profile
-
-Benchmarked on embedded-class x86/ARM hardware (2 CPU threads):
-
-| Metric | Target Budget | Actual Observed | Result |
-| :--- | :--- | :--- | :--- |
-| **Memory Footprint (RSS)** | $< 2048\text{ MB}$ | **$561\text{ MB}$** | **Pass (72.6% headroom)** |
-| **Model Size on Disk** | $< 1000\text{ MB}$ | **$491\text{ MB}$** | **Pass** |
-| **Deterministic SQL Retrieval** | $< 50\text{ ms}$ | **$2.4\text{ ms}$** | **Pass** |
-| **Local SLM Generation** | $< 3.0\text{ s}$ | **$1.4\text{ s}$** | **Pass** |
-| **Test Suite Coverage** | $100\%$ | **$62 / 62$ passed** | **Pass** |
-
----
-
-## 📄 Documentation Links
-
-- Detailed Implementation & Case Study Report: [docs/PROJECT_COMPLETION_REPORT.md](docs/PROJECT_COMPLETION_REPORT.md)
-- Edge Hardware Performance & Benchmarking: [docs/EDGE_PERFORMANCE_REPORT.md](docs/EDGE_PERFORMANCE_REPORT.md)
-- SLM Weights Setup: [models/README.md](models/README.md)
-
----
-
-## 📜 License
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+*For complete implementation details, see [docs/PROJECT_COMPLETION_REPORT.md](docs/PROJECT_COMPLETION_REPORT.md) and [docs/EDGE_PERFORMANCE_REPORT.md](docs/EDGE_PERFORMANCE_REPORT.md).*
