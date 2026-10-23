@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trend Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="analytics">
+    <h1 style="text-align:center;">Trend Analytics</h1>
+
+    <div class="analytics-grid">
+
+        <div class="chart-card">
+            <canvas id="speedChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <canvas id="batteryChart"></canvas>
+        </div>
+
+        <div class="chart-card full-width">
+            <canvas id="tyreChart"></canvas>
+        </div>
+
+    </div>
+
+    <a href="/">← Back to Dashboard</a>
+</div>
+
+<script>
+let speedChart, batteryChart, tyreChart;
+
+function createChart(ctx, label, color) {
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: label,
+                data: [],
+                borderColor: color,
+                borderWidth: 3,
+                pointRadius: 3,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: "#fff" }},
+                y: { ticks: { color: "#fff" }}
+            },
+            plugins: {
+                legend: {
+                    labels: { color: "#fff" }
+                }
+            }
+        }
+    });
+}
+
+function initCharts() {
+    speedChart = createChart(
+        document.getElementById("speedChart"),
+        "Speed Trend (km/h)",
+        "#00E5FF"
+    );
+
+    batteryChart = createChart(
+        document.getElementById("batteryChart"),
+        "Battery Trend (%)",
+        "#00E676"
+    );
+
+    tyreChart = createChart(
+        document.getElementById("tyreChart"),
+        "Tyre Pressure Trend (PSI)",
+        "#FF9800"
+    );
+}
+
+function updateChart(chart, data) {
+    chart.data.labels = data.map((_, i) => i + 1);
+    chart.data.datasets[0].data = data;
+    chart.update();
+}
+
+function loadData() {
+    fetch("/data")
+        .then(res => res.json())
+        .then(data => {
+            updateChart(speedChart, data.speed_history);
+            updateChart(batteryChart, data.battery_history);
+            updateChart(tyreChart, data.tyre_history);
+        });
+}
+
+initCharts();
+loadData();
+setInterval(loadData, 3000);
+</script>
+
+</body>
+</html>

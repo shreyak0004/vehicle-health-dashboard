@@ -1,97 +1,2838 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Vehicle Health Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VehicleGPT — Intelligent Vehicle Health Assistant</title>
 
-    <!-- Link external CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=2.5">
+
+    <!-- Chart.js (Offline Local Copy) -->
+    <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+    <script>
+        // Apply saved theme immediately before first render to prevent theme flashing
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('vehicle_theme');
+                if (savedTheme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
+    <div class="app-container">
 
-    <!-- Animated Flares -->
-    <div class="flare one"></div>
-    <div class="flare two"></div>
-    <div class="flare three"></div>
+        <!-- ================= Top Navigation Header ================= -->
+        <header class="app-header">
+            <div class="brand-section">
+                <!-- Collapsible Dashboard Sidebar Toggle Button -->
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Collapse / Expand Dashboard Sidebar" aria-label="Toggle Dashboard Sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="brand-icon">
+                    <!-- Sparkle / AI Star Icon -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L14.2 8.3L20.5 10.5L14.2 12.7L12 19L9.8 12.7L3.5 10.5L9.8 8.3L12 2Z" />
+                        <path d="M19 16L20 19L23 20L20 21L19 24L18 21L15 20L18 19L19 16Z" opacity="0.8" />
+                    </svg>
+                </div>
+                <div class="brand-title">VehicleGPT</div>
+                <div class="brand-subtitle">Intelligent Vehicle Health Assistant</div>
+            </div>
 
-    <!-- Dashboard Card -->
-    <div class="dashboard">
-        <h1>Vehicle Health Dashboard</h1>
+            <div class="header-right">
+                <!-- Simulation Mode Switcher -->
+                <select id="scenarioSelect" class="scenario-dropdown" onchange="loadData()">
+                    <option value="normal">Simulation: Normal Driving</option>
+                    <option value="low_battery">Simulation: Low Battery</option>
+                    <option value="overspeed">Simulation: Over-speeding</option>
+                </select>
 
-        <div class="timestamp" id="time">Last Update: --</div>
+                <!-- Light / Dark Theme Switcher Button -->
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch to Light Theme" aria-label="Toggle theme appearance">
+                    <span class="theme-toggle-icon" id="themeToggleIcon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle-text" id="themeToggleText">Light</span>
+                </button>
 
-        <<div class="item">
-    Speed: <span id="speedText">--</span>
-    <div class="bar">
-        <div class="bar-fill speed-fill" id="speedBar"></div>
+                <!-- TATA ELXSI Brand
+            <div class="partner-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 12h8M12 8v8"/>
+                </svg>
+                <span>TATA ELXSI</span>
+            </div> -->
+
+                <!-- Online / Connected Status -->
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    <span>Connected</span>
+                </div>
+
+                <!-- Real-time Timestamp -->
+                <div class="header-datetime" id="liveHeaderTime">Oct 20, 2026 06:54 PM</div>
+            </div>
+        </header>
+
+        <!-- ================= App Main Body ================= -->
+        <div class="app-body">
+
+            <!-- ================= Left Navigation Sidebar ================= -->
+            <aside class="sidebar">
+                <ul class="nav-list">
+                    <li class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')" data-tooltip="Dashboard">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                        <span>Dashboard</span>
+                    </li>
+
+                    <li class="nav-item" id="nav-analytics" onclick="switchTab('analytics')" data-tooltip="Analytics">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg>
+                        <span>Analytics</span>
+                    </li>
+
+                    <li class="nav-item" id="nav-alerts" onclick="switchTab('alerts')" data-tooltip="Alerts">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span>Alerts</span>
+                        <span class="nav-badge" id="navAlertBadge">2</span>
+                    </li>
+
+                    <li class="nav-item" id="nav-chat" onclick="focusChat()" data-tooltip="VehicleGPT AI">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span>VehicleGPT</span>
+                    </li>
+
+                    <li class="nav-item" id="nav-reports" onclick="switchTab('reports')" data-tooltip="Reports">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                        <span>Reports</span>
+                    </li>
+
+                    <li class="nav-item" id="nav-settings" onclick="switchTab('settings')" data-tooltip="Settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        <span>Settings</span>
+                    </li>
+                </ul>
+
+                <!-- Bottom Mode Pill -->
+                <div class="sidebar-footer">
+                    <div class="sidebar-footer-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="sidebar-footer-title">EV Mode</div>
+                        <div class="sidebar-footer-sub" id="sidebarStatusText">All systems nominal</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ================= Main Content Center ================= -->
+            <main class="main-content">
+
+                <!-- ================= TAB 1: DASHBOARD ================= -->
+                <div class="tab-pane active" id="pane-dashboard">
+
+                <!-- --- Row 1: 5 Top Metric Cards --- -->
+                <div class="metrics-row">
+                    <!-- 1. Battery -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Battery</span>
+                            <div class="metric-icon-wrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="2" y="7" width="16" height="10" rx="2" ry="2" />
+                                    <line x1="22" y1="11" x2="22" y2="13" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-row">
+                            <span class="metric-value" id="cardBattery">78</span>
+                            <span class="metric-unit">%</span>
+                        </div>
+                        <div class="metric-progress">
+                            <div class="metric-progress-fill fill-copper" id="barBattery" style="width: 78%;"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span>Range: <strong id="cardRange" class="metric-tag-copper">302 km</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Vehicle Health -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Vehicle Health</span>
+                            <div class="metric-icon-wrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-row">
+                            <span class="metric-value" id="cardHealth">86</span>
+                            <span class="metric-unit">/ 100</span>
+                        </div>
+                        <div class="metric-progress">
+                            <div class="metric-progress-fill fill-green" id="barHealth" style="width: 86%;"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span id="cardHealthDesc" class="metric-tag-healthy">Good condition</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Speed -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Speed</span>
+                            <div class="metric-icon-wrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M16 12l-4-4v8" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-row">
+                            <span class="metric-value" id="cardSpeed">95</span>
+                            <span class="metric-unit">km/h</span>
+                        </div>
+                        <div class="metric-progress">
+                            <div class="metric-progress-fill fill-copper" id="barSpeed" style="width: 70%;"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span>Avg (last 10 min)</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Battery Temp -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Battery Temp</span>
+                            <div class="metric-icon-wrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-row">
+                            <span class="metric-value" id="cardBattTemp">42.7</span>
+                            <span class="metric-unit">°C</span>
+                        </div>
+                        <div class="metric-progress">
+                            <div class="metric-progress-fill fill-green" id="barTemp" style="width: 45%;"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span id="cardTempTag" class="metric-tag-healthy">Normal range</span>
+                        </div>
+                    </div>
+
+                    <!-- 5. Tyre Pressure -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span>Tyre Pressure</span>
+                            <div class="metric-icon-wrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="4" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-value-row">
+                            <span class="metric-value" id="cardTyre">34</span>
+                            <span class="metric-unit">psi</span>
+                        </div>
+                        <div class="metric-progress">
+                            <div class="metric-progress-fill fill-green" id="barTyre" style="width: 85%;"></div>
+                        </div>
+                        <div class="metric-footer">
+                            <span id="cardTyreTag" class="metric-tag-healthy">All tyres normal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --- Row 2: Middle Grid (Vehicle Status & Recent Alerts) --- -->
+                <div class="middle-grid">
+
+                    <!-- Vehicle Status with Top-down Car Wireframe -->
+                    <div class="dashboard-card">
+                        <div class="card-header-bar">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                    color="var(--accent-copper)">
+                                    <circle cx="12" cy="4" r="2" />
+                                    <circle cx="4" cy="12" r="2" />
+                                    <circle cx="20" cy="12" r="2" />
+                                    <circle cx="12" cy="20" r="2" />
+                                </svg>
+                                <span>Vehicle Status</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-muted);">Real-time Telemetry</span>
+                        </div>
+
+                        <div class="vehicle-stage" id="vehicleStage">
+                            <!-- Connecting Dotted Vectors (Dynamically Calculated) -->
+                            <svg class="node-line" id="vehicleNodeLines" width="100%" height="100%">
+                                <!-- Left Front (Battery) line -->
+                                <line id="lineBattery" x1="130" y1="52" x2="200" y2="100" />
+                                <!-- Right Front (Motor) line -->
+                                <line id="lineMotor" x1="330" y1="52" x2="260" y2="100" />
+                                <!-- Left Rear (Tyres) line -->
+                                <line id="lineTyre" x1="130" y1="230" x2="200" y2="190" />
+                                <!-- Right Rear (Brakes) line -->
+                                <line id="lineBrakes" x1="330" y1="230" x2="260" y2="190" />
+
+                                <!-- Chassis Docking Anchor Dots -->
+                                <circle id="dotBattery" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                <circle id="dotMotor" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                <circle id="dotTyre" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                <circle id="dotBrakes" cx="0" cy="0" r="3.5" class="chassis-dot" />
+
+                                <!-- Card Anchor Dots -->
+                                <circle id="dotCardBattery" cx="0" cy="0" r="2.5" class="card-dot" />
+                                <circle id="dotCardMotor" cx="0" cy="0" r="2.5" class="card-dot" />
+                                <circle id="dotCardTyre" cx="0" cy="0" r="2.5" class="card-dot" />
+                                <circle id="dotCardBrakes" cx="0" cy="0" r="2.5" class="card-dot" />
+                            </svg>
+
+                            <!-- Top-Left: Battery -->
+                            <div class="car-node node-top-left" id="nodeBattery">
+                                <div class="node-icon-box node-icon-green">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="2" y="7" width="16" height="10" rx="2" />
+                                        <line x1="22" y1="11" x2="22" y2="13" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="node-label">Battery</div>
+                                    <div class="node-val" id="nodeBatteryVal">78%</div>
+                                    <div class="node-sub" id="nodeBatterySub">302 km</div>
+                                </div>
+                            </div>
+
+                            <!-- Top-Right: Motor Temp -->
+                            <div class="car-node node-top-right" id="nodeMotor">
+                                <div class="node-icon-box node-icon-copper">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="4" y="4" width="16" height="16" rx="2" />
+                                        <path d="M9 9h6v6H9z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="node-label">Motor Temp</div>
+                                    <div class="node-val" id="nodeMotorVal">42.7 °C</div>
+                                    <div class="node-sub">Normal</div>
+                                </div>
+                            </div>
+
+                            <!-- Central Top-Down Car Silhouette (Sleek Dark Modern Sedan) -->
+                            <div class="car-svg-wrap" id="carSvgWrap">
+                                <svg width="130" height="250" viewBox="0 0 130 250" fill="none">
+                                    <!-- Wheels -->
+                                    <rect x="8" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
+                                    <rect x="112" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
+                                    <rect x="8" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
+                                    <rect x="112" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
+
+                                    <!-- Car Body Base Shadow -->
+                                    <path
+                                        d="M22 60 C22 25, 45 12, 65 12 C85 12, 108 25, 108 60 L110 180 C110 215, 95 238, 65 238 C35 238, 20 215, 20 180 Z"
+                                        fill="#241E1A" stroke="#3D332B" stroke-width="2" />
+
+                                    <!-- Hood Lines -->
+                                    <path d="M36 28 C45 22, 85 22, 94 28" stroke="rgba(217, 154, 98, 0.4)"
+                                        stroke-width="1.5" stroke-linecap="round" />
+
+                                    <!-- Windshield Front -->
+                                    <path d="M30 65 L40 92 L90 92 L100 65 C85 58, 45 58, 30 65 Z" fill="#14100E"
+                                        stroke="rgba(217, 154, 98, 0.25)" />
+
+                                    <!-- Panoramic Glass Roof -->
+                                    <path d="M38 98 L92 98 L90 160 L40 160 Z" fill="#181310"
+                                        stroke="rgba(255, 255, 255, 0.05)" />
+
+                                    <!-- Rear Window -->
+                                    <path d="M38 168 L92 168 L98 190 C85 195, 45 195, 32 190 Z" fill="#14100E"
+                                        stroke="rgba(217, 154, 98, 0.2)" />
+
+                                    <!-- Front Headlights (Warm Ivory Glow) -->
+                                    <path d="M24 38 C28 30, 36 26, 42 25" stroke="#E8D8C4" stroke-width="3"
+                                        stroke-linecap="round" />
+                                    <path d="M106 38 C102 30, 94 26, 88 25" stroke="#E8D8C4" stroke-width="3"
+                                        stroke-linecap="round" />
+
+                                    <!-- Rear Taillights (Signal Red Glow) -->
+                                    <path d="M26 218 C35 226, 95 226, 104 218" stroke="#FF6B6B" stroke-width="3"
+                                        stroke-linecap="round" />
+
+                                    <!-- Subtle Center Glow Line -->
+                                    <circle cx="65" cy="128" r="4" fill="#D99A62" />
+                                </svg>
+                            </div>
+
+                            <!-- Bottom-Left: Tyre Pressure -->
+                            <div class="car-node node-bottom-left" id="nodeTyre">
+                                <div class="node-icon-box node-icon-copper">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="node-label">Tyre Pressure</div>
+                                    <div class="node-val" id="nodeTyreVal">34 psi</div>
+                                    <div class="node-sub" id="nodeTyreSub">All normal</div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom-Right: Brakes -->
+                            <div class="car-node node-bottom-right" id="nodeBrakes">
+                                <div class="node-icon-box node-icon-copper">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="M12 7v10M7 12h10" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="node-label">Brakes</div>
+                                    <div class="node-val">OK</div>
+                                    <div class="node-sub">Normal</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Alerts Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header-bar">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                </svg>
+                                <span>Recent Alerts</span>
+                            </div>
+                            <a href="#alerts" class="card-action-link">View All →</a>
+                        </div>
+
+                        <div class="alerts-list" id="alertsListContainer">
+                            <!-- Alert 1: Overheat Warning -->
+                            <div class="alert-row">
+                                <div class="alert-main">
+                                    <div class="alert-icon-wrap icon-warning">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                            <line x1="12" y1="9" x2="12" y2="13" />
+                                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="alert-title">Battery overheating warning</div>
+                                        <div class="alert-desc">Temperature increased to 55.1 °C</div>
+                                    </div>
+                                </div>
+                                <div class="alert-meta">
+                                    <span>18:54</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Alert 2: ADAS -->
+                            <div class="alert-row">
+                                <div class="alert-main">
+                                    <div class="alert-icon-wrap icon-warning">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                            <line x1="12" y1="9" x2="12" y2="13" />
+                                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="alert-title">ADAS disengagement</div>
+                                        <div class="alert-desc">Lane markings not detected</div>
+                                    </div>
+                                </div>
+                                <div class="alert-meta">
+                                    <span>18:44</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Alert 3: ADAS -->
+                            <div class="alert-row">
+                                <div class="alert-main">
+                                    <div class="alert-icon-wrap icon-warning">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                            <line x1="12" y1="9" x2="12" y2="13" />
+                                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="alert-title">ADAS disengagement</div>
+                                        <div class="alert-desc">Lane markings not detected</div>
+                                    </div>
+                                </div>
+                                <div class="alert-meta">
+                                    <span>18:18</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Alert 4: Tyre Normal -->
+                            <div class="alert-row">
+                                <div class="alert-main">
+                                    <div class="alert-icon-wrap icon-healthy">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="alert-title">Tyre pressure normal</div>
+                                        <div class="alert-desc">All tyres within range</div>
+                                    </div>
+                                </div>
+                                <div class="alert-meta">
+                                    <span>17:52</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Alert 5: Critical Motor Temp -->
+                            <div class="alert-row">
+                                <div class="alert-main">
+                                    <div class="alert-icon-wrap icon-critical">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="15" y1="9" x2="9" y2="15" />
+                                            <line x1="9" y1="9" x2="15" y2="15" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="alert-title">High motor temperature</div>
+                                        <div class="alert-desc">Temperature exceeded 95 °C</div>
+                                    </div>
+                                </div>
+                                <div class="alert-meta">
+                                    <span>16:21</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- --- Row 3: Bottom Grid (Charts & Status & Insights) --- -->
+                <div class="bottom-grid">
+
+                    <!-- Battery Temp Trend Chart -->
+                    <div class="dashboard-card">
+                        <div class="chart-header">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                </svg>
+                                <span>Battery Temperature Trend</span>
+                            </div>
+                            <div class="chart-badge-tag">55.1 °C · 18:54</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="battTempChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Speed Trend Chart -->
+                    <div class="dashboard-card">
+                        <div class="chart-header">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M16 12l-4-4v8" />
+                                </svg>
+                                <span>Speed Trend</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-muted);">km/h</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="speedTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- --- Row 4: Component Status & Quick Insights --- -->
+                <div class="bottom-cards-row">
+                    <!-- Component Status -->
+                    <div class="dashboard-card">
+                        <div class="card-header-bar">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                                    <polyline points="2 17 12 22 22 17" />
+                                    <polyline points="2 12 12 17 22 12" />
+                                </svg>
+                                <span>Component Status</span>
+                            </div>
+                            <a href="/analytics" class="card-action-link">View Details →</a>
+                        </div>
+
+                        <div class="component-status-grid">
+                            <div class="component-pill">
+                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="16" height="10" rx="2" />
+                                    <line x1="22" y1="11" x2="22" y2="13" />
+                                </svg>
+                                <span class="c-title">Battery</span>
+                                <span class="c-value" id="compBattery">78%</span>
+                                <span class="c-status">Good</span>
+                            </div>
+
+                            <div class="component-pill">
+                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                                    <path d="M9 9h6v6H9z" />
+                                </svg>
+                                <span class="c-title">Motor</span>
+                                <span class="c-value">42.7 °C</span>
+                                <span class="c-status">Normal</span>
+                            </div>
+
+                            <div class="component-pill">
+                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="4" />
+                                </svg>
+                                <span class="c-title">Tyres</span>
+                                <span class="c-value" id="compTyre">34 psi</span>
+                                <span class="c-status">Normal</span>
+                            </div>
+
+                            <div class="component-pill">
+                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M12 7v10M7 12h10" />
+                                </svg>
+                                <span class="c-title">Brakes</span>
+                                <span class="c-value">OK</span>
+                                <span class="c-status">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Insights -->
+                    <div class="dashboard-card">
+                        <div class="card-header-bar">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <line x1="18" y1="20" x2="18" y2="10" />
+                                    <line x1="12" y1="20" x2="12" y2="4" />
+                                    <line x1="6" y1="20" x2="6" y2="14" />
+                                </svg>
+                                <span>Quick Insights</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-dim);">Last 24 hours</span>
+                        </div>
+
+                        <div class="insights-grid">
+                            <div class="insight-item">
+                                <div class="insight-header">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--status-healthy)">
+                                        <path
+                                            d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                                    </svg>
+                                    <span>Energy usage</span>
+                                </div>
+                                <div class="insight-value">15.2 <span
+                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">kWh/100km</span>
+                                </div>
+                                <div class="insight-trend trend-good">↓ 8% vs yesterday</div>
+                            </div>
+
+                            <div class="insight-item">
+                                <div class="insight-header">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <line x1="4" y1="19" x2="8" y2="5" />
+                                        <line x1="20" y1="19" x2="16" y2="5" />
+                                    </svg>
+                                    <span>Avg. speed</span>
+                                </div>
+                                <div class="insight-value">95.3 <span
+                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">km/h</span>
+                                </div>
+                                <div class="insight-trend trend-warn">↑ 12% vs yesterday</div>
+                            </div>
+
+                            <div class="insight-item">
+                                <div class="insight-header">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--status-healthy)">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                        <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                    <span>Distance</span>
+                                </div>
+                                <div class="insight-value">182 <span
+                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">km</span>
+                                </div>
+                                <div class="insight-trend trend-good">↑ 5% vs yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div><!-- /pane-dashboard -->
+
+                <!-- ================= TAB 2: ANALYTICS (TRENDS) ================= -->
+                <div class="tab-pane" id="pane-analytics">
+                    <div class="view-header-bar">
+                        <div class="view-title-group">
+                            <div class="view-title">Telemetry Trend Analytics</div>
+                            <div class="view-subtitle">Real-time multi-signal telemetry streams & historical trends</div>
+                        </div>
+                        <div class="view-header-actions">
+                            <div class="filter-pill-group">
+                                <button class="filter-pill active" onclick="setAnalyticsRange('10m', this)">10m Live</button>
+                                <button class="filter-pill" onclick="setAnalyticsRange('1h', this)">1 Hour</button>
+                                <button class="filter-pill" onclick="setAnalyticsRange('24h', this)">24 Hours</button>
+                                <button class="filter-pill" onclick="setAnalyticsRange('7d', this)">7 Days</button>
+                            </div>
+                            <button class="btn-action-copper" onclick="loadData()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="23 4 23 10 17 10"/>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                </svg>
+                                <span>Sync Telemetry</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 Grid of Rich Charts -->
+                    <div class="analytics-grid-2x2">
+
+                        <!-- Chart 1: Speed Trend -->
+                        <div class="analytics-chart-card">
+                            <div class="analytics-chart-header">
+                                <div class="analytics-chart-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M16 12l-4-4v8"/>
+                                    </svg>
+                                    <span>Vehicle Speed Trend (km/h)</span>
+                                </div>
+                                <div class="analytics-stat-chips">
+                                    <span class="stat-chip">Avg: <strong id="anSpeedAvg">68 km/h</strong></span>
+                                    <span class="stat-chip">Peak: <strong id="anSpeedPeak">98 km/h</strong></span>
+                                </div>
+                            </div>
+                            <div class="analytics-canvas-wrap">
+                                <canvas id="analyticsSpeedCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Battery SoC & Range -->
+                        <div class="analytics-chart-card">
+                            <div class="analytics-chart-header">
+                                <div class="analytics-chart-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                        <rect x="2" y="7" width="16" height="10" rx="2"/>
+                                        <line x1="22" y1="11" x2="22" y2="13"/>
+                                    </svg>
+                                    <span>Battery State of Charge (%)</span>
+                                </div>
+                                <div class="analytics-stat-chips">
+                                    <span class="stat-chip healthy">Level: <strong id="anBatteryCurrent">78%</strong></span>
+                                    <span class="stat-chip">Range: <strong id="anBatteryRange">302 km</strong></span>
+                                </div>
+                            </div>
+                            <div class="analytics-canvas-wrap">
+                                <canvas id="analyticsBatteryCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 3: Battery Temperature -->
+                        <div class="analytics-chart-card">
+                            <div class="analytics-chart-header">
+                                <div class="analytics-chart-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                                    </svg>
+                                    <span>Battery & Motor Thermal Trend (°C)</span>
+                                </div>
+                                <div class="analytics-stat-chips">
+                                    <span class="stat-chip">Limit: <strong>50.0 °C</strong></span>
+                                    <span class="stat-chip warning">Current: <strong id="anTempCurrent">42.7 °C</strong></span>
+                                </div>
+                            </div>
+                            <div class="analytics-canvas-wrap">
+                                <canvas id="analyticsTempCanvas"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 4: Tyre Pressure -->
+                        <div class="analytics-chart-card">
+                            <div class="analytics-chart-header">
+                                <div class="analytics-chart-title">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="4"/>
+                                    </svg>
+                                    <span>Tyre Pressure Stability (psi)</span>
+                                </div>
+                                <div class="analytics-stat-chips">
+                                    <span class="stat-chip healthy">Status: <strong id="anTyreStatus">Nominal</strong></span>
+                                    <span class="stat-chip">Avg: <strong id="anTyreCurrent">34 psi</strong></span>
+                                </div>
+                            </div>
+                            <div class="analytics-canvas-wrap">
+                                <canvas id="analyticsTyreCanvas"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Live Telemetry Stream Data Table -->
+                    <div class="telemetry-table-card">
+                        <div class="card-header-bar" style="margin-bottom:0;">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <line x1="8" y1="6" x2="21" y2="6"/>
+                                    <line x1="8" y1="12" x2="21" y2="12"/>
+                                    <line x1="8" y1="18" x2="21" y2="18"/>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                </svg>
+                                <span>Recent Telemetry Broadcast Frames</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-dim);">Live Ingestion Buffer (Last 10 frames)</span>
+                        </div>
+                        <div class="telemetry-table-wrap">
+                            <table class="telemetry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Frame #</th>
+                                        <th>Timestamp</th>
+                                        <th>Speed (km/h)</th>
+                                        <th>Battery (%)</th>
+                                        <th>Thermal (°C)</th>
+                                        <th>Tyre (psi)</th>
+                                        <th>Gear / Mode</th>
+                                        <th>System Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="telemetryTableBody">
+                                    <!-- populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 3: ALERTS ================= -->
+                <div class="tab-pane" id="pane-alerts">
+                    <div class="view-header-bar">
+                        <div class="view-title-group">
+                            <div class="view-title">Diagnostics & Vehicle Alerts</div>
+                            <div class="view-subtitle">Diagnostic Trouble Codes (DTC), ADAS handover events, and thermal anomalies</div>
+                        </div>
+                        <div class="view-header-actions">
+                            <div class="filter-pill-group" id="alertFilterGroup">
+                                <button class="filter-pill active" onclick="filterAlertCards('all', this)">All (5)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('critical', this)">Critical (2)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('warning', this)">Warnings (2)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('healthy', this)">Resolved (1)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Counter Stats Grid -->
+                    <div class="alerts-stats-grid">
+                        <div class="alert-stat-card">
+                            <span class="status-indicator-dot dot-critical"></span>
+                            <div>
+                                <div class="alert-stat-num">2</div>
+                                <div class="alert-stat-label">Critical Faults</div>
+                            </div>
+                        </div>
+
+                        <div class="alert-stat-card">
+                            <span class="status-indicator-dot dot-warning"></span>
+                            <div>
+                                <div class="alert-stat-num">2</div>
+                                <div class="alert-stat-label">System Warnings</div>
+                            </div>
+                        </div>
+
+                        <div class="alert-stat-card">
+                            <span class="status-indicator-dot dot-healthy"></span>
+                            <div>
+                                <div class="alert-stat-num">1</div>
+                                <div class="alert-stat-label">Auto-Resolved</div>
+                            </div>
+                        </div>
+
+                        <div class="alert-stat-card">
+                            <span class="status-indicator-dot dot-copper"></span>
+                            <div>
+                                <div class="alert-stat-num" id="alertsTabHealthScore">86</div>
+                                <div class="alert-stat-label">Health Index</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts List Feed -->
+                    <div class="alerts-feed" id="alertsDetailedFeed">
+                        <!-- Alert 1: Overheat -->
+                        <div class="alert-card-detailed" data-severity="critical">
+                            <div class="alert-card-left">
+                                <span class="sev-tag sev-critical">CRITICAL</span>
+                                <div class="alert-row-body">
+                                    <div class="alert-row-header">
+                                        <span class="alert-row-title">Battery Pack Core Temperature Spiked to 55.1 °C</span>
+                                        <span class="data-source-pill">Telemetry Event · DTC P0A7E</span>
+                                        <span class="alert-row-meta">18:54:02 · BMS Sensor THM-MOD-04</span>
+                                    </div>
+                                    <div class="alert-row-desc">Exceeded thermal safety threshold (50.0 °C) under sustained highway load. Active cooling loop engaged.</div>
+                                </div>
+                            </div>
+                            <div class="alert-card-right">
+                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Why did the battery overheat?')">
+                                    <span>Investigate</span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert 2: Motor Temp -->
+                        <div class="alert-card-detailed" data-severity="critical">
+                            <div class="alert-card-left">
+                                <span class="sev-tag sev-critical">CRITICAL</span>
+                                <div class="alert-row-body">
+                                    <div class="alert-row-header">
+                                        <span class="alert-row-title">Drive Motor Stator Core Temperature High</span>
+                                        <span class="data-source-pill">Telemetry Event · DTC P0A2B</span>
+                                        <span class="alert-row-meta">16:21:40 · EDU Inverter Stator Phase C</span>
+                                    </div>
+                                    <div class="alert-row-desc">Motor winding temperature reached 95.4 °C under high torque demand. Autonomous torque derate protocol applied.</div>
+                                </div>
+                            </div>
+                            <div class="alert-card-right">
+                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('What was the highest battery temperature yesterday?')">
+                                    <span>Investigate</span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert 3: ADAS Disengagement -->
+                        <div class="alert-card-detailed" data-severity="warning">
+                            <div class="alert-card-left">
+                                <span class="sev-tag sev-warning">WARNING</span>
+                                <div class="alert-row-body">
+                                    <div class="alert-row-header">
+                                        <span class="alert-row-title">Lane Keeping Assist Handover Requested</span>
+                                        <span class="data-source-pill">Telemetry Event · ADAS Handover</span>
+                                        <span class="alert-row-meta">18:44:11 · Forward Vision ECU · 104 km/h</span>
+                                    </div>
+                                    <div class="alert-row-desc">Forward optical camera confidence dropped below 60% due to degraded lane markings. Control yielded to driver.</div>
+                                </div>
+                            </div>
+                            <div class="alert-card-right">
+                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Show ADAS disengagement events from yesterday')">
+                                    <span>Investigate</span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert 4: ADAS Optical Glare -->
+                        <div class="alert-card-detailed" data-severity="warning">
+                            <div class="alert-card-left">
+                                <span class="sev-tag sev-warning">WARNING</span>
+                                <div class="alert-row-body">
+                                    <div class="alert-row-header">
+                                        <span class="alert-row-title">ADAS Camera Direct Sunset Glare Detected</span>
+                                        <span class="data-source-pill">Telemetry Event · Sensor Attenuation</span>
+                                        <span class="alert-row-meta">18:18:29 · Perception Fusion ECU</span>
+                                    </div>
+                                    <div class="alert-row-desc">Low evening sun angle saturated camera CMOS sensor for 12 seconds. AEB sensitivity temporarily scaled.</div>
+                                </div>
+                            </div>
+                            <div class="alert-card-right">
+                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Show yesterday alerts')">
+                                    <span>Investigate</span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert 5: Tyre Pressure Normal -->
+                        <div class="alert-card-detailed" data-severity="healthy">
+                            <div class="alert-card-left">
+                                <span class="sev-tag sev-healthy">HEALTHY</span>
+                                <div class="alert-row-body">
+                                    <div class="alert-row-header">
+                                        <span class="alert-row-title">Tyre Pressures Nominal Across All 4 Wheels</span>
+                                        <span class="data-source-pill">Baseline Check · TPMS</span>
+                                        <span class="alert-row-meta">17:52:14 · TPMS Sensor Mesh (FL/FR 34, RL/RR 35 psi)</span>
+                                    </div>
+                                    <div class="alert-row-desc">Cold-start pressures stabilized at operating levels. No slow punctures, imbalances, or pressure leaks detected.</div>
+                                </div>
+                            </div>
+                            <div class="alert-card-right">
+                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Are there any tyre pressure anomalies?')">
+                                    <span>Verify</span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ================= TAB 4: REPORTS ================= -->
+                <div class="tab-pane" id="pane-reports">
+                    <div class="view-header-bar">
+                        <div class="view-title-group">
+                            <div class="view-title">Vehicle Health & Diagnostic Report</div>
+                            <div class="view-subtitle">Automated inspection certificate, subsystem telemetry audit, and maintenance outlook</div>
+                        </div>
+                        <div class="view-header-actions">
+                            <button class="btn-action-copper" onclick="window.print()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 6 2 18 2 18 9"/>
+                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                    <rect x="6" y="14" width="12" height="8"/>
+                                </svg>
+                                <span>Print / Export PDF</span>
+                            </button>
+                            <button class="btn-action-graphite" onclick="downloadDiagnosticReport()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span>Export JSON</span>
+                            </button>
+                            <button class="btn-action-copper" onclick="askQuestion('Generate a full diagnostic health summary report for my vehicle')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L14.2 8.3L20.5 10.5L14.2 12.7L12 19L9.8 12.7L3.5 10.5L9.8 8.3L12 2Z"/>
+                                </svg>
+                                <span>AI Diagnostic Scan</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Hero Banner -->
+                    <div class="report-hero-card">
+                        <div class="report-hero-profile">
+                            <div class="report-hero-title">Tata Nexon EV — Long Range Tech Spec</div>
+                            <div class="report-vin-tags">
+                                <span>VIN: <strong>MAT612059P002931</strong></span>
+                                <span>•</span>
+                                <span>Firmware: <strong>v4.2.1-OTA</strong></span>
+                                <span>•</span>
+                                <span>Odometer: <strong>18,420 km</strong></span>
+                                <span>•</span>
+                                <span>Battery Pack: <strong>40.5 kWh LFP</strong></span>
+                            </div>
+                        </div>
+                        <div class="report-health-badge-box">
+                            <div class="report-health-score-big" id="reportHealthScore">86</div>
+                            <div>
+                                <div style="font-weight:700; color:var(--text-ivory-bright); font-size:14px;">Health Grade: A</div>
+                                <div style="font-size:11px; color:var(--status-healthy);">Nominal Operating Condition</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6 Subsystems Grid -->
+                    <div class="report-subsystems-grid">
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>1. Traction Battery</span>
+                                <span class="alert-card-badge badge-healthy">Good</span>
+                            </div>
+                            <div class="subsystem-metric">94% SoH</div>
+                            <div class="subsystem-desc">LFP chemistry with 142 total charge cycles. Cell-to-cell delta voltage is 0.012V (well within 0.030V tolerance).</div>
+                        </div>
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>2. Electric Drive & Inverter</span>
+                                <span class="alert-card-badge badge-healthy">Optimal</span>
+                            </div>
+                            <div class="subsystem-metric">98.2%</div>
+                            <div class="subsystem-desc">Permanent magnet synchronous motor showing minimal inverter harmonic distortion. Insulation resistance: 520 MΩ.</div>
+                        </div>
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>3. Thermal Management</span>
+                                <span class="alert-card-badge badge-warning">Attention</span>
+                            </div>
+                            <div class="subsystem-metric">82 / 100</div>
+                            <div class="subsystem-desc">1 thermal spike logged (55.1 °C). Radiator intake airflow acceptable. Recommend inspection of cooling radiator grille.</div>
+                        </div>
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>4. Regenerative Brakes</span>
+                                <span class="alert-card-badge badge-healthy">Optimal</span>
+                            </div>
+                            <div class="subsystem-metric">99 / 100</div>
+                            <div class="subsystem-desc">Blended regen recovers 28% of deceleration energy. Friction brake pad wear estimated at less than 15%.</div>
+                        </div>
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>5. ADAS & Vision Sensor</span>
+                                <span class="alert-card-badge badge-warning">2 Events</span>
+                            </div>
+                            <div class="subsystem-metric">90 / 100</div>
+                            <div class="subsystem-desc">Forward radar and front stereo camera calibrated. 2 driver handovers logged over 24h due to low sun glare and faded lane lines.</div>
+                        </div>
+
+                        <div class="subsystem-card">
+                            <div class="subsystem-header">
+                                <span>6. Auxiliary 12V Battery</span>
+                                <span class="alert-card-badge badge-healthy">Healthy</span>
+                            </div>
+                            <div class="subsystem-metric">13.8 V</div>
+                            <div class="subsystem-desc">DC-DC converter float charge nominal. Quiescent standby current drain is low (22 mA).</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Scheduled Maintenance Outlook -->
+                    <div class="dashboard-card">
+                        <div class="card-header-bar" style="margin-bottom:8px;">
+                            <div class="card-title-group">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                <span>Scheduled Maintenance & Service Forecast</span>
+                            </div>
+                            <span class="metric-tag-copper">Next Service: 25,000 km (in 6,580 km)</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">
+                            Vehicle is currently adhering to preventive maintenance schedule. Items scheduled for next service include: tyre rotation and balance check, cabin HEPA air filter replacement, brake fluid moisture test, and coolant loop specific gravity validation.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 5: SETTINGS ================= -->
+                <div class="tab-pane" id="pane-settings">
+                    <div class="view-header-bar">
+                        <div class="view-title-group">
+                            <div class="view-title">Cockpit & VehicleGPT Settings</div>
+                            <div class="view-subtitle">Telemetry preferences, units of measurement, threshold triggers, and offline AI engine</div>
+                        </div>
+                        <div class="view-header-actions">
+                            <button class="btn-action-copper" onclick="saveCockpitSettings()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                    <polyline points="17 21 17 13 7 13 7 21"/>
+                                    <polyline points="7 3 7 8 15 8"/>
+                                </svg>
+                                <span>Save Settings</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+
+                        <!-- Panel 1: Telemetry & Simulation -->
+                        <div class="settings-card">
+                            <div class="settings-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                                <span>Telemetry & Simulation</span>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Driving Scenario Simulation</div>
+                                    <div class="setting-sub">Switch active vehicle stress condition</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingsScenarioSelect" class="setting-select" onchange="syncScenario(this.value)">
+                                        <option value="normal">Normal Driving</option>
+                                        <option value="low_battery">Low Battery</option>
+                                        <option value="overspeed">Over-speeding</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Telemetry Polling Rate</div>
+                                    <div class="setting-sub">Frequency of live data stream updates</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingPollRate" class="setting-select" onchange="updatePollRate(this.value)">
+                                        <option value="1000">1 Second (High Frequency)</option>
+                                        <option value="3000" selected>3 Seconds (Standard)</option>
+                                        <option value="5000">5 Seconds (Eco)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Live Telemetry Streaming</div>
+                                    <div class="setting-sub">Automatically fetch sensor frames</div>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="setting-switch">
+                                        <input type="checkbox" id="settingStreamingToggle" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2: Units & Display -->
+                        <div class="settings-card">
+                            <div class="settings-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span>Units & Display</span>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Theme Appearance</div>
+                                    <div class="setting-sub">Switch between Dark Workstation and Light Theme</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingThemeSelect" class="setting-select" onchange="applyTheme(this.value)">
+                                        <option value="dark">Dark Theme (Default)</option>
+                                        <option value="light">Light Theme</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Speed Unit</div>
+                                    <div class="setting-sub">Speedometer measurement system</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingSpeedUnit" class="setting-select">
+                                        <option value="kmh" selected>km/h (Metric)</option>
+                                        <option value="mph">mph (Imperial)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Temperature Unit</div>
+                                    <div class="setting-sub">Thermal readings scale</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingTempUnit" class="setting-select">
+                                        <option value="c" selected>°C (Celsius)</option>
+                                        <option value="f">°F (Fahrenheit)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Tyre Pressure Unit</div>
+                                    <div class="setting-sub">Wheel inflation pressure format</div>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="settingPressureUnit" class="setting-select">
+                                        <option value="psi" selected>psi (Pound/sq inch)</option>
+                                        <option value="bar">bar</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3: Threshold Triggers -->
+                        <div class="settings-card">
+                            <div class="settings-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                                <span>Safety & Alert Thresholds</span>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Battery Overheat Warning (°C)</div>
+                                    <div class="setting-sub">Triggers critical cooling alert</div>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" class="setting-input" style="width:70px;" value="50.0" step="0.5">
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Low Battery Warning (%)</div>
+                                    <div class="setting-sub">Prompts range conservation mode</div>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" class="setting-input" style="width:70px;" value="20" step="5">
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Speeding Caution (km/h)</div>
+                                    <div class="setting-sub">Audible highway speed chime threshold</div>
+                                </div>
+                                <div class="setting-control">
+                                    <input type="number" class="setting-input" style="width:70px;" value="110" step="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 4: On-Device AI Engine -->
+                        <div class="settings-card">
+                            <div class="settings-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                    <path d="M12 2a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z"/>
+                                </svg>
+                                <span>VehicleGPT On-Device AI</span>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Active GGUF Model</div>
+                                    <div class="setting-sub">491 MB quantized offline model</div>
+                                </div>
+                                <div class="setting-control">
+                                    <span class="stat-chip" style="font-size:11px;">qwen2.5-0.5b-instruct-q4_k_m</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Inference Runtime</div>
+                                    <div class="setting-sub">Direct local CPU computation</div>
+                                </div>
+                                <div class="setting-control">
+                                    <span class="stat-chip healthy">llama-cpp-python v0.3.36</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Offline AI Status</div>
+                                    <div class="setting-sub">Private, no external internet needed</div>
+                                </div>
+                                <div class="setting-control">
+                                    <div class="status-pill" style="padding:4px 10px; font-size:11px;">
+                                        <span class="status-dot"></span>
+                                        <span>Ready</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- ================= Right VehicleGPT AI Assistant ================= -->
+            <aside class="chat-sidebar" id="chatSidebar">
+
+                <!-- Chat Header with Controls -->
+                <div class="chat-header">
+                    <div class="chat-header-main">
+                        <div class="chat-avatar">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2zm-3 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-5 6h4a1 1 0 0 0 0-2H10a1 1 0 0 0 0 2z" />
+                            </svg>
+                        </div>
+                        <div class="chat-title-group">
+                            <div class="chat-title-row">
+                                <h3>VehicleGPT</h3>
+                                <span class="chat-online-tag">Online</span>
+                            </div>
+                            <p id="chatSubTitle">Ask questions about vehicle data</p>
+                        </div>
+                    </div>
+
+                    <!-- Header Quick Navigation & Clear Controls -->
+                    <div class="chat-header-actions">
+                        <button class="chat-action-btn" onclick="scrollChatToTop()" title="Scroll to top of chat" id="btnScrollTop">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="18 15 12 9 6 15" />
+                            </svg>
+                            <span>Top</span>
+                        </button>
+                        <button class="chat-action-btn" onclick="clearChat()" title="Start fresh conversation" id="btnClearChat">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            <span>Clear</span>
+                        </button>
+                        <button class="chat-action-btn" onclick="toggleChat(false)" title="Minimize VehicleGPT Assistant" id="btnMinimizeChat">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Min</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Message Stream -->
+                <div class="chat-messages" id="chatLog">
+                    <!-- Welcome Bot Message -->
+                    <div class="chat-msg bot">
+                        <div class="chat-bubble">
+                            Hello! I'm VehicleGPT. You can ask me about your vehicle health, alerts, trends and more.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Jump to Latest Button -->
+                <button class="chat-floating-jump" id="chatJumpBtn" onclick="scrollChatToBottom()" title="Jump to newest message">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                    <span>Latest</span>
+                </button>
+
+                <!-- Suggested Prompt Horizontal Chips -->
+                <div class="chat-suggestions-area" id="chatSuggestionsArea">
+                    <div class="suggestions-header-row">
+                        <span class="suggestions-label">Try asking</span>
+                        <div class="suggestions-controls">
+                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(-140)" title="Scroll left" aria-label="Scroll left">‹</button>
+                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(140)" title="Scroll right" aria-label="Scroll right">›</button>
+                            <button class="suggestions-toggle-btn" id="toggleSuggestionsBtn" onclick="toggleSuggestions()">Hide</button>
+                        </div>
+                    </div>
+                    <div class="suggestions-scroll-track" id="suggestionsContainer">
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">How is my battery doing?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show yesterday's alerts</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Why did battery overheat?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Compare city vs highway</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Battery temperature trend</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Are there any tyre pressure anomalies?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show ADAS disengagement events</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Explain DTC P0A7E code</button>
+                    </div>
+                </div>
+
+                <!-- Input Bar -->
+                <div class="chat-input-bar">
+                    <div class="chat-input-wrap">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask a question..."
+                            autocomplete="off">
+                        <button id="sendBtn" class="chat-send-btn" onclick="sendInputQuestion()" title="Send question">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="chat-footer-note">Powered by On-device AI · Using simulated data</div>
+                </div>
+
+            </aside>
+
+        </div>
+
+        <!-- ================= Floating Round Chatbot Button (Bottom Right) ================= -->
+        <button class="chat-floating-fab" id="chatFloatingFab" onclick="toggleChat()" title="VehicleGPT AI Assistant (Click to open / minimize)" aria-label="Open or minimize VehicleGPT chatbot">
+            <div class="fab-pulse-ring"></div>
+            <div class="fab-icon-wrap">
+                <!-- Chatbot Icon (Visible when chat is minimized) -->
+                <svg class="fab-icon-chat" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    <circle cx="9" cy="10" r="1.2" fill="currentColor"></circle>
+                    <circle cx="15" cy="10" r="1.2" fill="currentColor"></circle>
+                    <path d="M9.5 13.5c.8.6 2.2.6 3 0" stroke-width="1.5"></path>
+                </svg>
+                <!-- Close / Minimize Icon (Visible when chat is open) -->
+                <svg class="fab-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+            <!-- Online Status Dot Badge -->
+            <span class="fab-badge" title="AI Assistant Online"></span>
+            <!-- Tooltip Label -->
+            <span class="fab-tooltip" id="fabTooltip">Ask VehicleGPT</span>
+        </button>
+
     </div>
-</div>
 
-<div class="item">
-    Battery: <span id="batteryText">--</span>
-    <div class="bar">
-        <div class="bar-fill battery-fill" id="batteryBar"></div>
-    </div>
-</div>
-
-        <div class="item" id="tyre">Tyre Pressure: --</div>
-
-        <div class="health" id="health">Health Score: --</div>
-        <div class="item" id="alerts">Status: --</div>
-
-        <button onclick="loadData()">Manual Refresh</button>
-    </div>
-
+    <!-- ================= Client-Side Scripts ================= -->
     <script>
+        // --- Real-time Date/Time in Header ---
+        function updateLiveTime() {
+            const now = new Date();
+            const options = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            const el = document.getElementById('liveHeaderTime');
+            if (el) el.innerText = now.toLocaleString('en-US', options);
+        }
+        setInterval(updateLiveTime, 1000);
+        updateLiveTime();
+
+        // --- State Management ---
+        let currentTab = 'dashboard';
+        let latestTelemetryData = null;
+        let recentFrames = [];
+        let frameCounter = 1042;
+        let pollInterval = 3000;
+        let pollTimerId = null;
+
+        // --- Tab Switching Navigation ---
+        const ALL_TABS = ['dashboard', 'analytics', 'alerts', 'reports', 'settings'];
+
+        function switchTab(tabName, updateHistory = true) {
+            if (!ALL_TABS.includes(tabName)) tabName = 'dashboard';
+            currentTab = tabName;
+
+            // 1. Sidebar Nav Item Highlighting
+            ALL_TABS.forEach(t => {
+                const navEl = document.getElementById(`nav-${t}`);
+                if (navEl) {
+                    if (t === tabName) navEl.classList.add('active');
+                    else navEl.classList.remove('active');
+                }
+            });
+
+            // 2. Tab Pane Activation
+            ALL_TABS.forEach(t => {
+                const paneEl = document.getElementById(`pane-${t}`);
+                if (paneEl) {
+                    if (t === tabName) paneEl.classList.add('active');
+                    else paneEl.classList.remove('active');
+                }
+            });
+
+            // 3. Browser History Sync
+            if (updateHistory) {
+                const targetUrl = tabName === 'dashboard' ? '/' : `/${tabName}`;
+                window.history.pushState({ tab: tabName }, '', targetUrl);
+            }
+
+            // 4. If Analytics pane, ensure charts are initialized & resized
+            if (tabName === 'analytics') {
+                if (!analyticsChartsInitialized) {
+                    initAnalyticsCharts();
+                }
+                // Trigger resize after DOM unhides
+                setTimeout(() => {
+                    if (analyticsSpeedChart) analyticsSpeedChart.resize();
+                    if (analyticsBatteryChart) analyticsBatteryChart.resize();
+                    if (analyticsTempChart) analyticsTempChart.resize();
+                    if (analyticsTyreChart) analyticsTyreChart.resize();
+                }, 60);
+
+                // Populate with current data if available
+                if (latestTelemetryData) {
+                    updateAnalyticsCharts(latestTelemetryData);
+                }
+            } else if (tabName === 'dashboard') {
+                setTimeout(updateVehicleConnectionLines, 60);
+            }
+        }
+
+        // Handle Browser Forward / Back buttons
+        window.addEventListener('popstate', (e) => {
+            let tab = 'dashboard';
+            if (e.state && e.state.tab) {
+                tab = e.state.tab;
+            } else {
+                const path = window.location.pathname.replace(/^\//, '');
+                if (ALL_TABS.includes(path)) tab = path;
+            }
+            switchTab(tab, false);
+        });
+
+        // --- Master Dashboard Charts Initialization ---
+        let battTempChart, speedTrendChart;
+
+        function initMasterCharts() {
+            const ctxBatt = document.getElementById("battTempChart");
+            if (ctxBatt) {
+                battTempChart = new Chart(ctxBatt, {
+                    type: 'line',
+                    data: {
+                        labels: ['18:24', '18:28', '18:32', '18:36', '18:40', '18:44', '18:48', '18:52'],
+                        datasets: [{
+                            label: 'Battery Temp (°C)',
+                            data: [37.3, 37.1, 37.4, 38.7, 41.9, 44.8, 49.4, 55.1],
+                            borderColor: '#D99A62',
+                            backgroundColor: 'rgba(217, 154, 98, 0.05)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#241E1A',
+                                titleColor: '#E8D8C4',
+                                bodyColor: '#D99A62',
+                                borderColor: 'rgba(217, 154, 98, 0.25)',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#8C827A', font: { size: 10 } },
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                            },
+                            y: {
+                                min: 20,
+                                max: 60,
+                                ticks: { color: '#8C827A', font: { size: 10 }, stepSize: 10 },
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxSpeed = document.getElementById("speedTrendChart");
+            if (ctxSpeed) {
+                speedTrendChart = new Chart(ctxSpeed, {
+                    type: 'line',
+                    data: {
+                        labels: ['18:24', '18:28', '18:32', '18:36', '18:40', '18:44', '18:48', '18:52'],
+                        datasets: [{
+                            label: 'Speed (km/h)',
+                            data: [92, 98, 93, 102, 95, 104, 96, 95],
+                            borderColor: '#E8D8C4',
+                            backgroundColor: 'rgba(232, 216, 196, 0.04)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                ticks: { color: '#8C827A', font: { size: 10 } },
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                            },
+                            y: {
+                                min: 0,
+                                max: 120,
+                                ticks: { color: '#8C827A', font: { size: 10 }, stepSize: 40 },
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // --- Analytics 4 Trend Charts Initialization ---
+        let analyticsSpeedChart, analyticsBatteryChart, analyticsTempChart, analyticsTyreChart;
+        let analyticsChartsInitialized = false;
+
+        function initAnalyticsCharts() {
+            if (analyticsChartsInitialized) return;
+
+            const chartDefaults = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 250 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#241E1A',
+                        titleColor: '#E8D8C4',
+                        bodyColor: '#D99A62',
+                        borderColor: 'rgba(217, 154, 98, 0.25)',
+                        borderWidth: 1,
+                        padding: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#8C827A', font: { size: 9 }, maxRotation: 0 },
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                    },
+                    y: {
+                        ticks: { color: '#8C827A', font: { size: 9 } },
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                    }
+                }
+            };
+
+            // 1. Speed Chart
+            const ctxSpeed = document.getElementById("analyticsSpeedCanvas");
+            if (ctxSpeed) {
+                analyticsSpeedChart = new Chart(ctxSpeed, {
+                    type: 'line',
+                    data: {
+                        labels: ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                        datasets: [{
+                            label: 'Speed (km/h)',
+                            data: [45, 52, 68, 74, 82, 90, 85, 78, 88, 92],
+                            borderColor: '#E8D8C4',
+                            backgroundColor: 'rgba(232, 216, 196, 0.04)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        scales: {
+                            ...chartDefaults.scales,
+                            y: { ...chartDefaults.scales.y, min: 0, max: 140 }
+                        }
+                    }
+                });
+            }
+
+            // 2. Battery Chart
+            const ctxBattery = document.getElementById("analyticsBatteryCanvas");
+            if (ctxBattery) {
+                analyticsBatteryChart = new Chart(ctxBattery, {
+                    type: 'line',
+                    data: {
+                        labels: ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                        datasets: [{
+                            label: 'Battery SoC (%)',
+                            data: [82, 82, 81, 80, 80, 79, 79, 78, 78, 77],
+                            borderColor: '#4ADE80',
+                            backgroundColor: 'rgba(74, 222, 128, 0.05)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        scales: {
+                            ...chartDefaults.scales,
+                            y: { ...chartDefaults.scales.y, min: 0, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 3. Thermal Chart
+            const ctxTemp = document.getElementById("analyticsTempCanvas");
+            if (ctxTemp) {
+                analyticsTempChart = new Chart(ctxTemp, {
+                    type: 'line',
+                    data: {
+                        labels: ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                        datasets: [{
+                            label: 'Thermal (°C)',
+                            data: [37.2, 37.5, 38.1, 39.4, 41.2, 43.0, 46.5, 49.8, 52.3, 55.1],
+                            borderColor: '#D99A62',
+                            backgroundColor: 'rgba(217, 154, 98, 0.05)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        scales: {
+                            ...chartDefaults.scales,
+                            y: { ...chartDefaults.scales.y, min: 25, max: 65 }
+                        }
+                    }
+                });
+            }
+
+            // 4. Tyre Pressure Chart
+            const ctxTyre = document.getElementById("analyticsTyreCanvas");
+            if (ctxTyre) {
+                analyticsTyreChart = new Chart(ctxTyre, {
+                    type: 'line',
+                    data: {
+                        labels: ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                        datasets: [{
+                            label: 'Tyre Pressure (psi)',
+                            data: [33.8, 34.0, 34.1, 34.2, 34.2, 34.5, 34.4, 34.5, 34.6, 34.5],
+                            borderColor: '#FBBF24',
+                            backgroundColor: 'rgba(251, 191, 36, 0.05)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        scales: {
+                            ...chartDefaults.scales,
+                            y: { ...chartDefaults.scales.y, min: 25, max: 45 }
+                        }
+                    }
+                });
+            }
+
+            analyticsChartsInitialized = true;
+        }
+
+        function updateAnalyticsCharts(data) {
+            if (!analyticsChartsInitialized) {
+                initAnalyticsCharts();
+            }
+
+            const timestamps = data.timestamps_history && data.timestamps_history.length > 0
+                ? data.timestamps_history
+                : ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'];
+
+            // 1. Speed Chart
+            if (analyticsSpeedChart && data.speed_history && data.speed_history.length > 0) {
+                analyticsSpeedChart.data.labels = timestamps;
+                analyticsSpeedChart.data.datasets[0].data = data.speed_history;
+                analyticsSpeedChart.update('none');
+
+                const speeds = data.speed_history;
+                const avgSpeed = Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length);
+                const peakSpeed = Math.max(...speeds);
+                const elAvg = document.getElementById("anSpeedAvg");
+                const elPeak = document.getElementById("anSpeedPeak");
+                if (elAvg) elAvg.innerText = `${avgSpeed} km/h`;
+                if (elPeak) elPeak.innerText = `${peakSpeed} km/h`;
+            }
+
+            // 2. Battery Chart
+            if (analyticsBatteryChart && data.battery_history && data.battery_history.length > 0) {
+                analyticsBatteryChart.data.labels = timestamps;
+                analyticsBatteryChart.data.datasets[0].data = data.battery_history;
+                analyticsBatteryChart.update('none');
+
+                const elCurr = document.getElementById("anBatteryCurrent");
+                const elRange = document.getElementById("anBatteryRange");
+                if (elCurr) elCurr.innerText = `${data.vehicle_data.battery}%`;
+                if (elRange) elRange.innerText = `${Math.round((data.vehicle_data.battery / 100) * 385)} km`;
+            }
+
+            // 3. Thermal Chart
+            if (analyticsTempChart && data.battery_temp_history && data.battery_temp_history.length > 0) {
+                analyticsTempChart.data.labels = timestamps;
+                analyticsTempChart.data.datasets[0].data = data.battery_temp_history;
+                analyticsTempChart.update('none');
+
+                const elTemp = document.getElementById("anTempCurrent");
+                if (elTemp) {
+                    const curT = data.vehicle_data.battery_temp || 42.5;
+                    elTemp.innerText = `${curT} °C`;
+                    if (curT > 50.0) {
+                        elTemp.parentElement.className = "stat-chip warning";
+                    } else {
+                        elTemp.parentElement.className = "stat-chip healthy";
+                    }
+                }
+            }
+
+            // 4. Tyre Pressure Chart
+            if (analyticsTyreChart && data.tyre_history && data.tyre_history.length > 0) {
+                analyticsTyreChart.data.labels = timestamps;
+                analyticsTyreChart.data.datasets[0].data = data.tyre_history;
+                analyticsTyreChart.update('none');
+
+                const elTyre = document.getElementById("anTyreCurrent");
+                const elStatus = document.getElementById("anTyreStatus");
+                if (elTyre) elTyre.innerText = `${data.vehicle_data.tyre_pressure} psi`;
+                if (elStatus) {
+                    if (data.vehicle_data.tyre_pressure >= 28) {
+                        elStatus.innerText = "Nominal";
+                        elStatus.parentElement.className = "stat-chip healthy";
+                    } else {
+                        elStatus.innerText = "Low Pressure";
+                        elStatus.parentElement.className = "stat-chip warning";
+                    }
+                }
+            }
+        }
+
+        // Live Telemetry Table Feed
+        function updateTelemetryTable(data) {
+            const v = data.vehicle_data;
+            frameCounter++;
+            const tempVal = v.battery_temp || (data.battery_temp_history && data.battery_temp_history.slice(-1)[0]) || 41.2;
+            const isWarning = v.battery < 20 || v.speed > 110 || tempVal > 50.0 || v.tyre_pressure < 28;
+
+            const frame = {
+                id: frameCounter,
+                time: v.timestamp || new Date().toLocaleTimeString('en-US', { hour12: false }),
+                speed: v.speed,
+                battery: v.battery,
+                temp: tempVal,
+                tyre: v.tyre_pressure,
+                gear: v.gear || (v.speed > 0 ? 'D' : 'P'),
+                status: isWarning ? 'Warning' : 'Nominal'
+            };
+
+            recentFrames.unshift(frame);
+            if (recentFrames.length > 10) recentFrames.pop();
+
+            const tbody = document.getElementById("telemetryTableBody");
+            if (tbody) {
+                tbody.innerHTML = recentFrames.map(f => `
+                    <tr>
+                        <td style="color:var(--text-muted); font-size:11px;">#${f.id}</td>
+                        <td style="color:var(--text-ivory);">${f.time}</td>
+                        <td><strong>${f.speed}</strong> <span style="font-size:10px; color:var(--text-dim);">km/h</span></td>
+                        <td>${f.battery}%</td>
+                        <td style="${f.temp > 50 ? 'color:var(--status-critical); font-weight:700;' : ''}">${f.temp} °C</td>
+                        <td>${f.tyre} psi</td>
+                        <td><span class="stat-chip" style="font-size:10px; white-space:nowrap;">${f.gear} · Eco</span></td>
+                        <td>
+                            <span class="alert-card-badge ${f.status === 'Nominal' ? 'badge-healthy' : 'badge-warning'}" style="margin:0; font-size:9.5px;">
+                                ${f.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- Live Telemetry Data Fetcher ---
         function loadData() {
-            fetch("/data")
+            const scenarioSelect = document.getElementById("scenarioSelect");
+            const scenario = scenarioSelect ? scenarioSelect.value : "normal";
+
+            // Sync with settings scenario dropdown if present
+            const settingsScenario = document.getElementById("settingsScenarioSelect");
+            if (settingsScenario && settingsScenario.value !== scenario) {
+                settingsScenario.value = scenario;
+            }
+
+            fetch(`/data?scenario=${scenario}`)
                 .then(response => response.json())
                 .then(data => {
+                    latestTelemetryData = data;
+                    const v = data.vehicle_data;
 
-                    document.getElementById("time").innerText =
-                        "Last Update: " + data.vehicle_data.timestamp;
+                    // Speed
+                    const cardSpeed = document.getElementById("cardSpeed");
+                    const barSpeed = document.getElementById("barSpeed");
+                    if (cardSpeed) cardSpeed.innerText = v.speed;
+                    if (barSpeed) barSpeed.style.width = Math.min((v.speed / 130) * 100, 100) + "%";
 
-                    document.getElementById("speedText").innerText =
-    data.vehicle_data.speed + " km/h";
+                    // Battery
+                    const cardBattery = document.getElementById("cardBattery");
+                    const barBattery = document.getElementById("barBattery");
+                    const nodeBatteryVal = document.getElementById("nodeBatteryVal");
+                    const compBattery = document.getElementById("compBattery");
+                    if (cardBattery) cardBattery.innerText = v.battery;
+                    if (barBattery) barBattery.style.width = v.battery + "%";
+                    if (nodeBatteryVal) nodeBatteryVal.innerText = v.battery + "%";
+                    if (compBattery) compBattery.innerText = v.battery + "%";
 
-document.getElementById("batteryText").innerText =
-    data.vehicle_data.battery + " %";
+                    const estimatedKm = Math.round((v.battery / 100) * 385);
+                    const cardRange = document.getElementById("cardRange");
+                    const nodeBatterySub = document.getElementById("nodeBatterySub");
+                    if (cardRange) cardRange.innerText = estimatedKm + " km";
+                    if (nodeBatterySub) nodeBatterySub.innerText = estimatedKm + " km";
 
-document.getElementById("speedBar").style.width =
-    (data.vehicle_data.speed / 120) * 100 + "%";
+                    // Tyre Pressure
+                    const cardTyre = document.getElementById("cardTyre");
+                    const nodeTyreVal = document.getElementById("nodeTyreVal");
+                    const compTyre = document.getElementById("compTyre");
+                    if (cardTyre) cardTyre.innerText = v.tyre_pressure;
+                    if (nodeTyreVal) nodeTyreVal.innerText = v.tyre_pressure + " psi";
+                    if (compTyre) compTyre.innerText = v.tyre_pressure + " psi";
 
-document.getElementById("batteryBar").style.width =
-    data.vehicle_data.battery + "%";
+                    // Vehicle Health Score
+                    const cardHealth = document.getElementById("cardHealth");
+                    const barHealth = document.getElementById("barHealth");
+                    const alertsHealth = document.getElementById("alertsTabHealthScore");
+                    const reportHealth = document.getElementById("reportHealthScore");
+                    if (cardHealth) cardHealth.innerText = data.health_score;
+                    if (barHealth) barHealth.style.width = data.health_score + "%";
+                    if (alertsHealth) alertsHealth.innerText = data.health_score;
+                    if (reportHealth) reportHealth.innerText = data.health_score;
 
+                    const healthDesc = document.getElementById("cardHealthDesc");
+                    const statusTxt = document.getElementById("sidebarStatusText");
+                    const alertBadge = document.getElementById("navAlertBadge");
 
-                    document.getElementById("tyre").innerText =
-                        "Tyre Pressure: " + data.vehicle_data.tyre_pressure + " PSI";
-
-                    document.getElementById("health").innerText =
-                        "Health Score: " + data.health_score + " / 100";
-
-                    if (data.health_score >= 70) {
-                        document.getElementById("health").className = "health healthy";
+                    if (data.health_score >= 80) {
+                        if (healthDesc) { healthDesc.innerText = "Good condition"; healthDesc.className = "metric-tag-healthy"; }
+                        if (statusTxt) { statusTxt.innerText = "All systems nominal"; statusTxt.style.color = "var(--status-healthy)"; }
+                    } else if (data.health_score >= 50) {
+                        if (healthDesc) { healthDesc.innerText = "Attention required"; healthDesc.className = "metric-tag-copper"; }
+                        if (statusTxt) { statusTxt.innerText = "Moderate caution"; statusTxt.style.color = "var(--status-warning)"; }
                     } else {
-                        document.getElementById("health").className = "health warning";
+                        if (healthDesc) { healthDesc.innerText = "Critical issues"; healthDesc.style.color = "var(--status-critical)"; }
+                        if (statusTxt) { statusTxt.innerText = "Critical warnings active"; statusTxt.style.color = "var(--status-critical)"; }
                     }
 
-                    if (data.alerts.length > 0) {
-                        document.getElementById("alerts").innerText =
-                            "Alerts: " + data.alerts.join(", ");
-                    } else {
-                        document.getElementById("alerts").innerText =
-                            "Status: Vehicle is healthy";
+                    // Sync Nav Alerts Badge
+                    if (alertBadge) {
+                        alertBadge.innerText = data.alerts && data.alerts.length > 0 ? data.alerts.length : "0";
                     }
+
+                    // Update Dashboard speed trend chart dynamically
+                    if (speedTrendChart && data.speed_history && data.speed_history.length > 2) {
+                        speedTrendChart.data.datasets[0].data = data.speed_history;
+                        speedTrendChart.data.labels = data.timestamps_history || data.speed_history.map((_, i) => `${i + 1}m`);
+                        speedTrendChart.update('none');
+                    }
+
+                    // Update Dashboard batt temp chart dynamically if history present
+                    if (battTempChart && data.battery_temp_history && data.battery_temp_history.length > 2) {
+                        battTempChart.data.datasets[0].data = data.battery_temp_history;
+                        battTempChart.data.labels = data.timestamps_history || data.battery_temp_history.map((_, i) => `${i + 1}m`);
+                        battTempChart.update('none');
+                    }
+
+                    // Update Analytics 4 charts if Analytics tab is active or loaded
+                    if (analyticsChartsInitialized || currentTab === 'analytics') {
+                        updateAnalyticsCharts(data);
+                    }
+
+                    // Update Live Telemetry Stream Table
+                    updateTelemetryTable(data);
+                })
+                .catch(err => console.log("Data poll error:", err));
+        }
+
+        // --- Alerts Filtering ---
+        function filterAlertCards(severity, btn) {
+            const group = document.getElementById('alertFilterGroup');
+            if (group) {
+                group.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            }
+            if (btn) btn.classList.add('active');
+
+            const cards = document.querySelectorAll('#alertsDetailedFeed .alert-card-detailed');
+            cards.forEach(card => {
+                const cardSev = card.getAttribute('data-severity');
+                if (severity === 'all' || cardSev === severity) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // --- Reports Download ---
+        function downloadDiagnosticReport() {
+            const payload = {
+                vehicle: "Tata Nexon EV Max - Long Range Tech Spec",
+                vin: "MAT612059P002931",
+                firmware: "v4.2.1-OTA",
+                generated_at: new Date().toISOString(),
+                health_score: latestTelemetryData ? latestTelemetryData.health_score : 86,
+                active_scenario: latestTelemetryData ? latestTelemetryData.scenario : "normal",
+                telemetry: latestTelemetryData ? latestTelemetryData.vehicle_data : {
+                    speed: 92,
+                    battery: 78,
+                    battery_temp: 42.7,
+                    tyre_pressure: 34
+                },
+                subsystems: [
+                    { name: "Traction Battery Pack", status: "Good", SoH: "94%", cycles: 142 },
+                    { name: "Electric Drive Unit & Inverter", status: "Optimal", efficiency: "98.2%" },
+                    { name: "Thermal Management Loop", status: "Attention", max_recorded: "55.1 °C" },
+                    { name: "Regenerative Braking Subsystem", status: "Optimal", energy_recovery: "28%" },
+                    { name: "ADAS Forward Vision & Radar", status: "Attention", driver_handovers_24h: 2 },
+                    { name: "Auxiliary 12V Battery", status: "Healthy", float_voltage: "13.8 V" }
+                ],
+                diagnostics_summary: "Automated pre-flight inspection certificate validated without powertrain fault codes."
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `Tata_Nexon_EV_Diagnostics_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        // --- Settings Handlers ---
+        function syncScenario(val) {
+            const mainSelect = document.getElementById("scenarioSelect");
+            if (mainSelect) {
+                mainSelect.value = val;
+                loadData();
+            }
+        }
+
+        function updatePollRate(val) {
+            pollInterval = parseInt(val, 10) || 3000;
+            if (pollTimerId) clearInterval(pollTimerId);
+            const streamingToggle = document.getElementById("settingStreamingToggle");
+            if (!streamingToggle || streamingToggle.checked) {
+                pollTimerId = setInterval(loadData, pollInterval);
+            }
+        }
+
+        const streamingToggle = document.getElementById("settingStreamingToggle");
+        if (streamingToggle) {
+            streamingToggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    if (pollTimerId) clearInterval(pollTimerId);
+                    pollTimerId = setInterval(loadData, pollInterval);
+                } else {
+                    if (pollTimerId) clearInterval(pollTimerId);
+                    pollTimerId = null;
+                }
+            });
+        }
+
+        // ==========================================================================
+        // Light / Dark Theme Appearance System
+        // ==========================================================================
+        function getChartThemeColors() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            return {
+                gridColor: isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.03)',
+                tickColor: isLight ? '#6B5E52' : '#8C827A',
+                tooltipBg: isLight ? '#FFFFFF' : '#241E1A',
+                tooltipTitle: isLight ? '#181411' : '#E8D8C4',
+                tooltipBorder: isLight ? 'rgba(184, 115, 51, 0.35)' : 'rgba(217, 154, 98, 0.25)'
+            };
+        }
+
+        function updateChartsTheme(theme) {
+            const c = getChartThemeColors();
+            const allCharts = [battTempChart, speedTrendChart, analyticsSpeedChart, analyticsBatteryChart, analyticsTempChart, analyticsTyreChart, activeInlineChart];
+            allCharts.forEach(chart => {
+                if (!chart) return;
+                if (chart.options && chart.options.scales) {
+                    ['x', 'y'].forEach(axis => {
+                        if (chart.options.scales[axis]) {
+                            if (chart.options.scales[axis].grid) chart.options.scales[axis].grid.color = c.gridColor;
+                            if (chart.options.scales[axis].ticks) chart.options.scales[axis].ticks.color = c.tickColor;
+                        }
+                    });
+                }
+                if (chart.options && chart.options.plugins && chart.options.plugins.tooltip) {
+                    chart.options.plugins.tooltip.backgroundColor = c.tooltipBg;
+                    chart.options.plugins.tooltip.titleColor = c.tooltipTitle;
+                    chart.options.plugins.tooltip.borderColor = c.tooltipBorder;
+                }
+                chart.update();
+            });
+        }
+
+        function applyTheme(theme) {
+            const isLight = theme === 'light';
+            if (isLight) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.body.removeAttribute('data-theme');
+            }
+
+            try {
+                localStorage.setItem('vehicle_theme', isLight ? 'light' : 'dark');
+            } catch (e) {}
+
+            // Update Header Toggle Button
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            const toggleIcon = document.getElementById('themeToggleIcon');
+            const toggleText = document.getElementById('themeToggleText');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('title', isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme');
+                toggleBtn.setAttribute('aria-label', isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme');
+            }
+            if (toggleText) {
+                toggleText.textContent = isLight ? 'Dark' : 'Light';
+            }
+            if (toggleIcon) {
+                toggleIcon.innerHTML = isLight
+                    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+                    : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+            }
+
+            // Sync settings dropdown if present
+            const settingSelect = document.getElementById('settingThemeSelect');
+            if (settingSelect) {
+                settingSelect.value = isLight ? 'light' : 'dark';
+            }
+
+            // Re-render chart gridlines and tooltip palettes for high contrast
+            updateChartsTheme(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        }
+
+        function saveCockpitSettings() {
+            // Briefly animate save button
+            const settingSelect = document.getElementById('settingThemeSelect');
+            if (settingSelect) {
+                applyTheme(settingSelect.value);
+            }
+
+            const btn = document.querySelector("#pane-settings .btn-action-copper");
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Settings Saved!</span>
+                `;
+                btn.style.background = "var(--status-healthy)";
+                btn.style.color = "#181411";
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = "";
+                    btn.style.color = "";
+                }, 1800);
+            }
+        }
+
+        // --- Analytics Range Selector ---
+        function setAnalyticsRange(range, btn) {
+            const group = btn.parentElement;
+            if (group) {
+                group.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            }
+            btn.classList.add('active');
+
+            if (!analyticsChartsInitialized) return;
+
+            let labels = [];
+            if (range === '10m') {
+                labels = ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Now'];
+            } else if (range === '1h') {
+                labels = ['-50m', '-40m', '-30m', '-20m', '-10m', 'Now'];
+            } else if (range === '24h') {
+                labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Now'];
+            } else if (range === '7d') {
+                labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'];
+            }
+
+            if (analyticsSpeedChart) { analyticsSpeedChart.data.labels = labels; analyticsSpeedChart.update(); }
+            if (analyticsBatteryChart) { analyticsBatteryChart.data.labels = labels; analyticsBatteryChart.update(); }
+            if (analyticsTempChart) { analyticsTempChart.data.labels = labels; analyticsTempChart.update(); }
+            if (analyticsTyreChart) { analyticsTyreChart.data.labels = labels; analyticsTyreChart.update(); }
+        }
+
+        // ==========================================================================
+        // VehicleGPT Chat Assistant Script & Collapsible Layout
+        // ==========================================================================
+        const chatLog = document.getElementById("chatLog");
+        const chatInput = document.getElementById("chatInput");
+        const chatJumpBtn = document.getElementById("chatJumpBtn");
+        let activeInlineChart = null;
+        let questionCount = 0;
+
+        // --- Toggle Chat Assistant (Open / Minimized) ---
+        function toggleChat(forceState) {
+            const appBody = document.querySelector('.app-body');
+            const fab = document.getElementById('chatFloatingFab');
+            const fabTooltip = document.getElementById('fabTooltip');
+            if (!appBody || !fab) return;
+
+            const isCurrentlyOpen = appBody.classList.contains('chat-open');
+            const targetState = forceState !== undefined ? forceState : !isCurrentlyOpen;
+
+            if (targetState) {
+                appBody.classList.add('chat-open');
+                fab.classList.add('active');
+                if (fabTooltip) fabTooltip.textContent = 'Minimize VehicleGPT';
+                setTimeout(() => {
+                    if (chatInput) chatInput.focus();
+                }, 320);
+            } else {
+                appBody.classList.remove('chat-open');
+                fab.classList.remove('active');
+                if (fabTooltip) fabTooltip.textContent = 'Ask VehicleGPT';
+            }
+
+            // Smoothly resize charts as dashboard collapses/expands
+            setTimeout(resizeAllCharts, 360);
+        }
+
+        // --- Toggle Dashboard Sidebar (Collapse / Expand) ---
+        function toggleSidebar(forceState) {
+            const container = document.querySelector('.app-container');
+            if (!container) return;
+            const isCurrentlyCollapsed = container.classList.contains('sidebar-collapsed');
+            const targetState = forceState !== undefined ? forceState : !isCurrentlyCollapsed;
+
+            if (targetState) {
+                container.classList.add('sidebar-collapsed');
+            } else {
+                container.classList.remove('sidebar-collapsed');
+            }
+            try {
+                localStorage.setItem('vehicle_sidebar_collapsed', targetState ? 'true' : 'false');
+            } catch (e) {}
+            setTimeout(resizeAllCharts, 360);
+        }
+
+        // --- Resize All Active Charts & Visual Connectors ---
+        function resizeAllCharts() {
+            if (battTempChart) battTempChart.resize();
+            if (speedTrendChart) speedTrendChart.resize();
+            if (analyticsSpeedChart) analyticsSpeedChart.resize();
+            if (analyticsBatteryChart) analyticsBatteryChart.resize();
+            if (analyticsTempChart) analyticsTempChart.resize();
+            if (analyticsTyreChart) analyticsTyreChart.resize();
+            if (activeInlineChart) activeInlineChart.resize();
+            updateVehicleConnectionLines();
+        }
+
+        window.addEventListener('resize', () => {
+            clearTimeout(window.__chartResizeTimer);
+            window.__chartResizeTimer = setTimeout(() => {
+                resizeAllCharts();
+                updateVehicleConnectionLines();
+            }, 80);
+        });
+
+        // ==========================================================================
+        // Dynamic Vehicle Telemetry Connection Vectors
+        // Calculates exact endpoints so lines adapt smoothly across all screen widths
+        // ==========================================================================
+        function updateVehicleConnectionLines() {
+            const stage = document.getElementById('vehicleStage');
+            const carWrap = document.getElementById('carSvgWrap');
+            const nodeBatt = document.getElementById('nodeBattery');
+            const nodeMotor = document.getElementById('nodeMotor');
+            const nodeTyre = document.getElementById('nodeTyre');
+            const nodeBrakes = document.getElementById('nodeBrakes');
+
+            if (!stage || !carWrap || !nodeBatt || !nodeMotor || !nodeTyre || !nodeBrakes) return;
+
+            const stageRect = stage.getBoundingClientRect();
+            if (stageRect.width === 0 || stageRect.height === 0) return;
+
+            const carRect = carWrap.getBoundingClientRect();
+            const battRect = nodeBatt.getBoundingClientRect();
+            const motorRect = nodeMotor.getBoundingClientRect();
+            const tyreRect = nodeTyre.getBoundingClientRect();
+            const brakesRect = nodeBrakes.getBoundingClientRect();
+
+            // Car silhouette coordinates relative to stage
+            const carLeft = carRect.left - stageRect.left;
+            const carRight = carRect.right - stageRect.left;
+            const carTop = carRect.top - stageRect.top;
+            const carH = carRect.height;
+            const carW = carRect.width;
+
+            // Docking points on the vehicle chassis
+            const carBattX = carLeft + (carW * 0.17);
+            const carBattY = carTop + (carH * 0.28);
+
+            const carMotorX = carRight - (carW * 0.17);
+            const carMotorY = carTop + (carH * 0.28);
+
+            const carTyreX = carLeft + (carW * 0.17);
+            const carTyreY = carTop + (carH * 0.74);
+
+            const carBrakesX = carRight - (carW * 0.17);
+            const carBrakesY = carTop + (carH * 0.74);
+
+            // Card connection points (mid-height of the card edge facing the vehicle)
+            const battX = battRect.right - stageRect.left;
+            const battY = battRect.top + (battRect.height / 2) - stageRect.top;
+
+            const motorX = motorRect.left - stageRect.left;
+            const motorY = motorRect.top + (motorRect.height / 2) - stageRect.top;
+
+            const tyreX = tyreRect.right - stageRect.left;
+            const tyreY = tyreRect.top + (tyreRect.height / 2) - stageRect.top;
+
+            const brakesX = brakesRect.left - stageRect.left;
+            const brakesY = brakesRect.top + (brakesRect.height / 2) - stageRect.top;
+
+            // Update SVG Line endpoints
+            const setLine = (id, x1, y1, x2, y2) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('x1', Math.round(x1));
+                    el.setAttribute('y1', Math.round(y1));
+                    el.setAttribute('x2', Math.round(x2));
+                    el.setAttribute('y2', Math.round(y2));
+                }
+            };
+
+            setLine('lineBattery', battX, battY, carBattX, carBattY);
+            setLine('lineMotor', motorX, motorY, carMotorX, carMotorY);
+            setLine('lineTyre', tyreX, tyreY, carTyreX, carTyreY);
+            setLine('lineBrakes', brakesX, brakesY, carBrakesX, carBrakesY);
+
+            // Update Docking Anchor Dots
+            const setDot = (id, cx, cy) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('cx', Math.round(cx));
+                    el.setAttribute('cy', Math.round(cy));
+                }
+            };
+
+            setDot('dotBattery', carBattX, carBattY);
+            setDot('dotMotor', carMotorX, carMotorY);
+            setDot('dotTyre', carTyreX, carTyreY);
+            setDot('dotBrakes', carBrakesX, carBrakesY);
+
+            setDot('dotCardBattery', battX, battY);
+            setDot('dotCardMotor', motorX, motorY);
+            setDot('dotCardTyre', tyreX, tyreY);
+            setDot('dotCardBrakes', brakesX, brakesY);
+        }
+
+        function focusChat() {
+            toggleChat(true);
+        }
+
+        function scrollChatToTop() {
+            chatLog.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollChatToBottom() {
+            chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
+        }
+
+        function clearChat() {
+            if (activeInlineChart) {
+                try { activeInlineChart.destroy(); } catch (e) {}
+                activeInlineChart = null;
+            }
+            chatLog.innerHTML = `
+                <div class="chat-msg bot">
+                    <div class="chat-bubble">
+                        Hello! I'm VehicleGPT. You can ask me about your vehicle health, alerts, trends and more.
+                    </div>
+                </div>
+            `;
+            questionCount = 0;
+            document.getElementById("chatSubTitle").innerText = "Ask questions about vehicle data";
+            chatJumpBtn.classList.remove("visible");
+        }
+
+        function toggleSuggestions() {
+            const track = document.getElementById("suggestionsContainer");
+            const btn = document.getElementById("toggleSuggestionsBtn");
+            if (track.style.display === "none") {
+                track.style.display = "flex";
+                btn.textContent = "Hide";
+            } else {
+                track.style.display = "none";
+                btn.textContent = "Show";
+            }
+        }
+
+        function scrollSuggestionsTrack(offset) {
+            const container = document.getElementById("suggestionsContainer");
+            if (container) {
+                container.scrollBy({ left: offset, behavior: 'smooth' });
+            }
+        }
+
+        // Show/hide floating jump button when scrolled up
+        chatLog.addEventListener("scroll", () => {
+            const scrollBottomDist = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight;
+            if (scrollBottomDist > 80) {
+                chatJumpBtn.classList.add("visible");
+            } else {
+                chatJumpBtn.classList.remove("visible");
+            }
+        });
+
+        function appendMessage(sender, text, isHtml = false) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `chat-msg ${sender}`;
+
+            const bubble = document.createElement("div");
+            bubble.className = "chat-bubble";
+
+            if (isHtml) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = text;
+            }
+
+            msgDiv.appendChild(bubble);
+            chatLog.appendChild(msgDiv);
+            scrollChatToBottom();
+            return bubble;
+        }
+
+        function askQuestion(question) {
+            if (!question || !question.trim()) return;
+
+            toggleChat(true);
+            questionCount++;
+            document.getElementById("chatSubTitle").innerText = `${questionCount} query session · Active`;
+
+            // User message
+            appendMessage("user", question.trim());
+            chatInput.value = "";
+
+            // Bot placeholder
+            const botBubble = appendMessage("bot", "Analyzing vehicle telemetry...");
+
+            fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question.trim() })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    let answerText = data.answer || data.error || "No response received.";
+
+                    let htmlContent = `<div class="chat-answer-text">${escapeHtml(answerText)}</div>`;
+
+                    if (data.facts && data.facts.length > 0) {
+                        const factCount = data.facts.length;
+                        htmlContent += `
+                        <details class="chat-evidence-toggle">
+                            <summary class="evidence-summary">
+                                <span class="evidence-title">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                    </svg>
+                                    Database Evidence (${factCount} ${factCount === 1 ? 'record' : 'records'})
+                                </span>
+                                <span class="evidence-tag">${data.used_llm ? 'AI Verified' : 'Direct SQL'} · ${data.total_seconds}s</span>
+                                <span class="evidence-arrow">▾</span>
+                            </summary>
+                            <div class="evidence-body">
+                                <div class="evidence-sec-title">Recorded Database Telemetry:</div>
+                                <ul class="evidence-list">
+                                    ${data.facts.map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+                                </ul>
+                                ${data.rows && data.rows.length > 0 && typeof data.rows[0] === 'object' ? `
+                                <div class="evidence-sec-title" style="margin-top:8px;">Database Query Rows (${data.rows.length}):</div>
+                                <div class="evidence-table-mini-wrap">
+                                    <table class="evidence-mini-table">
+                                        <thead>
+                                            <tr>${Object.keys(data.rows[0]).slice(0, 3).map(k => `<th>${escapeHtml(k)}</th>`).join('')}</tr>
+                                        </thead>
+                                        <tbody>
+                                            ${data.rows.slice(0, 4).map(r => `
+                                                <tr>${Object.keys(r).slice(0, 3).map(k => `<td>${escapeHtml(String(r[k]))}</td>`).join('')}</tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>` : ''}
+                            </div>
+                        </details>`;
+                    }
+
+                    botBubble.innerHTML = htmlContent;
+
+                    // Charts ONLY when useful:
+                    // 1. Must have >= 3 values
+                    // 2. Must be a time-series progression (trend or event investigation)
+                    // 3. Must have noticeable numerical variance (not completely flat)
+                    const rawVals = data.chart && Array.isArray(data.chart.values) ? data.chart.values : [];
+                    const rawLabels = data.chart && Array.isArray(data.chart.labels) ? data.chart.labels : [];
+                    const hasVariance = rawVals.length >= 3 && (Math.max(...rawVals) - Math.min(...rawVals) > 0.05);
+                    const isUsefulIntent = ['trend', 'event_investigation'].includes(data.intent);
+
+                    if (data.chart && hasVariance && isUsefulIntent) {
+                        // Downsample if over 12 points to keep compact and avoid endless dense ticks
+                        let chartLabels = rawLabels;
+                        let chartValues = rawVals;
+                        if (rawLabels.length > 12) {
+                            const step = Math.ceil(rawLabels.length / 10);
+                            const sampledLabels = [];
+                            const sampledValues = [];
+                            for (let i = 0; i < rawLabels.length; i += step) {
+                                sampledLabels.push(rawLabels[i]);
+                                sampledValues.push(rawVals[i]);
+                            }
+                            if (sampledLabels[sampledLabels.length - 1] !== rawLabels[rawLabels.length - 1]) {
+                                sampledLabels.push(rawLabels[rawLabels.length - 1]);
+                                sampledValues.push(rawVals[rawVals.length - 1]);
+                            }
+                            chartLabels = sampledLabels;
+                            chartValues = sampledValues;
+                        }
+
+                        const chartBox = document.createElement("div");
+                        chartBox.className = "chat-chart-card";
+
+                        const chartHeader = document.createElement("div");
+                        chartHeader.className = "chat-chart-header";
+                        chartHeader.innerHTML = `<span>${escapeHtml(data.chart.label || 'Trend Progression')}</span><span>Telemetry Log</span>`;
+                        chartBox.appendChild(chartHeader);
+
+                        const canvasWrap = document.createElement("div");
+                        canvasWrap.className = "chat-chart-canvas-wrap";
+
+                        const canvas = document.createElement("canvas");
+                        canvasWrap.appendChild(canvas);
+                        chartBox.appendChild(canvasWrap);
+                        botBubble.appendChild(chartBox);
+
+                        if (activeInlineChart) {
+                            try { activeInlineChart.destroy(); } catch (e) {}
+                        }
+
+                        activeInlineChart = new Chart(canvas, {
+                            type: 'line',
+                            data: {
+                                labels: chartLabels,
+                                datasets: [{
+                                    label: data.chart.label,
+                                    data: chartValues,
+                                    borderColor: '#D99A62',
+                                    backgroundColor: 'rgba(217, 154, 98, 0.05)',
+                                    borderWidth: 1.5,
+                                    tension: 0.2,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 3,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: { duration: 150 },
+                                resizeDelay: 50,
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    x: {
+                                        ticks: {
+                                            color: '#8C827A',
+                                            font: { size: 9 },
+                                            maxTicksLimit: 6,
+                                            maxRotation: 0,
+                                            autoSkip: true
+                                        },
+                                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                                    },
+                                    y: {
+                                        ticks: {
+                                            color: '#8C827A',
+                                            font: { size: 9 },
+                                            maxTicksLimit: 4
+                                        },
+                                        grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    scrollChatToBottom();
+                })
+                .catch(err => {
+                    botBubble.innerHTML = `<span style="color:var(--status-critical);">Unable to reach vehicle assistant service.</span>`;
+                    scrollChatToBottom();
                 });
         }
 
-        // Auto-refresh every 3 seconds
-       loadData();                // initial fetch
-        setInterval(loadData, 3000);
+        function sendInputQuestion() {
+            askQuestion(chatInput.value);
+        }
 
+        chatInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                sendInputQuestion();
+            }
+        });
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // --- Initial Boot on Page Load ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Restore saved theme preference
+            try {
+                const savedTheme = localStorage.getItem('vehicle_theme') || 'dark';
+                applyTheme(savedTheme);
+            } catch (e) {}
+
+            // Restore saved sidebar collapsed state
+            try {
+                if (localStorage.getItem('vehicle_sidebar_collapsed') === 'true') {
+                    document.querySelector('.app-container').classList.add('sidebar-collapsed');
+                }
+            } catch (e) {}
+
+            initMasterCharts();
+            initAnalyticsCharts();
+
+            // Horizontal mouse wheel scrolling for suggestions chips
+            const suggTrack = document.getElementById("suggestionsContainer");
+            if (suggTrack) {
+                suggTrack.addEventListener("wheel", (e) => {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        suggTrack.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
+            }
+
+            // Determine initial tab from pathname (e.g. /analytics) or ?tab= query
+            const pathTab = window.location.pathname.replace(/^\//, '');
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryTab = urlParams.get('tab');
+
+            const startTab = ALL_TABS.includes(pathTab) ? pathTab : (ALL_TABS.includes(queryTab) ? queryTab : 'dashboard');
+            switchTab(startTab, false);
+
+            loadData();
+            pollTimerId = setInterval(loadData, pollInterval);
+
+            // Compute initial connection lines and attach ResizeObserver for responsive adaptation
+            updateVehicleConnectionLines();
+            setTimeout(updateVehicleConnectionLines, 100);
+            setTimeout(updateVehicleConnectionLines, 300);
+
+            if (window.ResizeObserver) {
+                const stage = document.getElementById('vehicleStage');
+                if (stage) {
+                    const ro = new ResizeObserver(() => {
+                        window.requestAnimationFrame(updateVehicleConnectionLines);
+                    });
+                    ro.observe(stage);
+                }
+            }
+        });
     </script>
 
 </body>
+
 </html>

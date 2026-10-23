@@ -1,0 +1,11 @@
+timestamp,vehicle_id,signal_name,value,unit,source,scenario
+2026-10-23 10:00:00,EV-001,speed,36.5,km/h,simulated,cold_weather
+2026-10-23 10:00:00,EV-001,battery_temp,15.2,°C,simulated,cold_weather
+2026-10-23 10:00:00,EV-001,battery_soc,88.5,%,simulated,cold_weather
+2026-10-23 10:00:00,EV-001,energy_wh_per_km,182.4,Wh/km,simulated,cold_weather
+2026-10-23 10:00:00,EV-001,ambient_temp,9.5,°C,simulated,cold_weather
+2026-10-23 10:00:00,EV-001,range_km,195.0,km,simulated,cold_weather
+2026-10-23 10:01:00,EV-001,speed,92.0,km/h,simulated,cold_weather
+2026-10-23 10:01:00,EV-001,energy_wh_per_km,218.0,Wh/km,simulated,cold_weather
+2026-10-23 10:01:00,EV-001,ambient_temp,9.4,°C,simulated,cold_weather
+2026-10-23 10:01:00,EV-001,range_km,192.5,km,simulated,cold_weather

@@ -1,7 +1,24 @@
-# Ignore Python cache
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
 
-# Ignore virtual environments
+# Environments
 venv/
 .env/
+env/
+
+# Large binary SLM models (GitHub 100MB limit)
+models/*.gguf
+models/*.bin
+
+# Local SQLite databases
+*.db
+*.sqlite3
+
+# Test caches & temp
+.pytest_cache/
+.coverage
+htmlcov/
+*.bak
+scratch/
