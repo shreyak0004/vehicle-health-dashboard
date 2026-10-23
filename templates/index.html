@@ -20,13 +20,13 @@
     <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
     <script>
         // Apply saved theme immediately before first render to prevent theme flashing
-        (function() {
+        (function () {
             try {
                 var savedTheme = localStorage.getItem('vehicle_theme');
                 if (savedTheme === 'light') {
                     document.documentElement.setAttribute('data-theme', 'light');
                 }
-            } catch (e) {}
+            } catch (e) { }
         })();
     </script>
 </head>
@@ -38,7 +38,8 @@
         <header class="app-header">
             <div class="brand-section">
                 <!-- Collapsible Dashboard Sidebar Toggle Button -->
-                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Collapse / Expand Dashboard Sidebar" aria-label="Toggle Dashboard Sidebar">
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()"
+                    title="Collapse / Expand Dashboard Sidebar" aria-label="Toggle Dashboard Sidebar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -65,9 +66,11 @@
                 </select>
 
                 <!-- Light / Dark Theme Switcher Button -->
-                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch to Light Theme" aria-label="Toggle theme appearance">
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()"
+                    title="Switch to Light Theme" aria-label="Toggle theme appearance">
                     <span class="theme-toggle-icon" id="themeToggleIcon">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
                             <circle cx="12" cy="12" r="5"></circle>
                             <line x1="12" y1="1" x2="12" y2="3"></line>
                             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -82,14 +85,7 @@
                     <span class="theme-toggle-text" id="themeToggleText">Light</span>
                 </button>
 
-                <!-- TATA ELXSI Brand
-            <div class="partner-logo">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M8 12h8M12 8v8"/>
-                </svg>
-                <span>TATA ELXSI</span>
-            </div> -->
+
 
                 <!-- Online / Connected Status -->
                 <div class="status-pill">
@@ -108,7 +104,8 @@
             <!-- ================= Left Navigation Sidebar ================= -->
             <aside class="sidebar">
                 <ul class="nav-list">
-                    <li class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')" data-tooltip="Dashboard">
+                    <li class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')"
+                        data-tooltip="Dashboard">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -191,595 +188,595 @@
                 <!-- ================= TAB 1: DASHBOARD ================= -->
                 <div class="tab-pane active" id="pane-dashboard">
 
-                <!-- --- Row 1: 5 Top Metric Cards --- -->
-                <div class="metrics-row">
-                    <!-- 1. Battery -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span>Battery</span>
-                            <div class="metric-icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <rect x="2" y="7" width="16" height="10" rx="2" ry="2" />
-                                    <line x1="22" y1="11" x2="22" y2="13" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-value-row">
-                            <span class="metric-value" id="cardBattery">78</span>
-                            <span class="metric-unit">%</span>
-                        </div>
-                        <div class="metric-progress">
-                            <div class="metric-progress-fill fill-copper" id="barBattery" style="width: 78%;"></div>
-                        </div>
-                        <div class="metric-footer">
-                            <span>Range: <strong id="cardRange" class="metric-tag-copper">302 km</strong></span>
-                        </div>
-                    </div>
-
-                    <!-- 2. Vehicle Health -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span>Vehicle Health</span>
-                            <div class="metric-icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path
-                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-value-row">
-                            <span class="metric-value" id="cardHealth">86</span>
-                            <span class="metric-unit">/ 100</span>
-                        </div>
-                        <div class="metric-progress">
-                            <div class="metric-progress-fill fill-green" id="barHealth" style="width: 86%;"></div>
-                        </div>
-                        <div class="metric-footer">
-                            <span id="cardHealthDesc" class="metric-tag-healthy">Good condition</span>
-                        </div>
-                    </div>
-
-                    <!-- 3. Speed -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span>Speed</span>
-                            <div class="metric-icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M16 12l-4-4v8" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-value-row">
-                            <span class="metric-value" id="cardSpeed">95</span>
-                            <span class="metric-unit">km/h</span>
-                        </div>
-                        <div class="metric-progress">
-                            <div class="metric-progress-fill fill-copper" id="barSpeed" style="width: 70%;"></div>
-                        </div>
-                        <div class="metric-footer">
-                            <span>Avg (last 10 min)</span>
-                        </div>
-                    </div>
-
-                    <!-- 4. Battery Temp -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span>Battery Temp</span>
-                            <div class="metric-icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-value-row">
-                            <span class="metric-value" id="cardBattTemp">42.7</span>
-                            <span class="metric-unit">°C</span>
-                        </div>
-                        <div class="metric-progress">
-                            <div class="metric-progress-fill fill-green" id="barTemp" style="width: 45%;"></div>
-                        </div>
-                        <div class="metric-footer">
-                            <span id="cardTempTag" class="metric-tag-healthy">Normal range</span>
-                        </div>
-                    </div>
-
-                    <!-- 5. Tyre Pressure -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span>Tyre Pressure</span>
-                            <div class="metric-icon-wrap">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <circle cx="12" cy="12" r="4" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-value-row">
-                            <span class="metric-value" id="cardTyre">34</span>
-                            <span class="metric-unit">psi</span>
-                        </div>
-                        <div class="metric-progress">
-                            <div class="metric-progress-fill fill-green" id="barTyre" style="width: 85%;"></div>
-                        </div>
-                        <div class="metric-footer">
-                            <span id="cardTyreTag" class="metric-tag-healthy">All tyres normal</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- --- Row 2: Middle Grid (Vehicle Status & Recent Alerts) --- -->
-                <div class="middle-grid">
-
-                    <!-- Vehicle Status with Top-down Car Wireframe -->
-                    <div class="dashboard-card">
-                        <div class="card-header-bar">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
-                                    color="var(--accent-copper)">
-                                    <circle cx="12" cy="4" r="2" />
-                                    <circle cx="4" cy="12" r="2" />
-                                    <circle cx="20" cy="12" r="2" />
-                                    <circle cx="12" cy="20" r="2" />
-                                </svg>
-                                <span>Vehicle Status</span>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-muted);">Real-time Telemetry</span>
-                        </div>
-
-                        <div class="vehicle-stage" id="vehicleStage">
-                            <!-- Connecting Dotted Vectors (Dynamically Calculated) -->
-                            <svg class="node-line" id="vehicleNodeLines" width="100%" height="100%">
-                                <!-- Left Front (Battery) line -->
-                                <line id="lineBattery" x1="130" y1="52" x2="200" y2="100" />
-                                <!-- Right Front (Motor) line -->
-                                <line id="lineMotor" x1="330" y1="52" x2="260" y2="100" />
-                                <!-- Left Rear (Tyres) line -->
-                                <line id="lineTyre" x1="130" y1="230" x2="200" y2="190" />
-                                <!-- Right Rear (Brakes) line -->
-                                <line id="lineBrakes" x1="330" y1="230" x2="260" y2="190" />
-
-                                <!-- Chassis Docking Anchor Dots -->
-                                <circle id="dotBattery" cx="0" cy="0" r="3.5" class="chassis-dot" />
-                                <circle id="dotMotor" cx="0" cy="0" r="3.5" class="chassis-dot" />
-                                <circle id="dotTyre" cx="0" cy="0" r="3.5" class="chassis-dot" />
-                                <circle id="dotBrakes" cx="0" cy="0" r="3.5" class="chassis-dot" />
-
-                                <!-- Card Anchor Dots -->
-                                <circle id="dotCardBattery" cx="0" cy="0" r="2.5" class="card-dot" />
-                                <circle id="dotCardMotor" cx="0" cy="0" r="2.5" class="card-dot" />
-                                <circle id="dotCardTyre" cx="0" cy="0" r="2.5" class="card-dot" />
-                                <circle id="dotCardBrakes" cx="0" cy="0" r="2.5" class="card-dot" />
-                            </svg>
-
-                            <!-- Top-Left: Battery -->
-                            <div class="car-node node-top-left" id="nodeBattery">
-                                <div class="node-icon-box node-icon-green">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <!-- --- Row 1: 5 Top Metric Cards --- -->
+                    <div class="metrics-row">
+                        <!-- 1. Battery -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span>Battery</span>
+                                <div class="metric-icon-wrap">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <rect x="2" y="7" width="16" height="10" rx="2" />
+                                        <rect x="2" y="7" width="16" height="10" rx="2" ry="2" />
                                         <line x1="22" y1="11" x2="22" y2="13" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <div class="node-label">Battery</div>
-                                    <div class="node-val" id="nodeBatteryVal">78%</div>
-                                    <div class="node-sub" id="nodeBatterySub">302 km</div>
-                                </div>
                             </div>
+                            <div class="metric-value-row">
+                                <span class="metric-value" id="cardBattery">78</span>
+                                <span class="metric-unit">%</span>
+                            </div>
+                            <div class="metric-progress">
+                                <div class="metric-progress-fill fill-copper" id="barBattery" style="width: 78%;"></div>
+                            </div>
+                            <div class="metric-footer">
+                                <span>Range: <strong id="cardRange" class="metric-tag-copper">302 km</strong></span>
+                            </div>
+                        </div>
 
-                            <!-- Top-Right: Motor Temp -->
-                            <div class="car-node node-top-right" id="nodeMotor">
-                                <div class="node-icon-box node-icon-copper">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <!-- 2. Vehicle Health -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span>Vehicle Health</span>
+                                <div class="metric-icon-wrap">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
-                                        <rect x="4" y="4" width="16" height="16" rx="2" />
-                                        <path d="M9 9h6v6H9z" />
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <div class="node-label">Motor Temp</div>
-                                    <div class="node-val" id="nodeMotorVal">42.7 °C</div>
-                                    <div class="node-sub">Normal</div>
+                            </div>
+                            <div class="metric-value-row">
+                                <span class="metric-value" id="cardHealth">86</span>
+                                <span class="metric-unit">/ 100</span>
+                            </div>
+                            <div class="metric-progress">
+                                <div class="metric-progress-fill fill-green" id="barHealth" style="width: 86%;"></div>
+                            </div>
+                            <div class="metric-footer">
+                                <span id="cardHealthDesc" class="metric-tag-healthy">Good condition</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Speed -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span>Speed</span>
+                                <div class="metric-icon-wrap">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M16 12l-4-4v8" />
+                                    </svg>
                                 </div>
                             </div>
-
-                            <!-- Central Top-Down Car Silhouette (Sleek Dark Modern Sedan) -->
-                            <div class="car-svg-wrap" id="carSvgWrap">
-                                <svg width="130" height="250" viewBox="0 0 130 250" fill="none">
-                                    <!-- Wheels -->
-                                    <rect x="8" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
-                                    <rect x="112" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
-                                    <rect x="8" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
-                                    <rect x="112" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
-
-                                    <!-- Car Body Base Shadow -->
-                                    <path
-                                        d="M22 60 C22 25, 45 12, 65 12 C85 12, 108 25, 108 60 L110 180 C110 215, 95 238, 65 238 C35 238, 20 215, 20 180 Z"
-                                        fill="#241E1A" stroke="#3D332B" stroke-width="2" />
-
-                                    <!-- Hood Lines -->
-                                    <path d="M36 28 C45 22, 85 22, 94 28" stroke="rgba(217, 154, 98, 0.4)"
-                                        stroke-width="1.5" stroke-linecap="round" />
-
-                                    <!-- Windshield Front -->
-                                    <path d="M30 65 L40 92 L90 92 L100 65 C85 58, 45 58, 30 65 Z" fill="#14100E"
-                                        stroke="rgba(217, 154, 98, 0.25)" />
-
-                                    <!-- Panoramic Glass Roof -->
-                                    <path d="M38 98 L92 98 L90 160 L40 160 Z" fill="#181310"
-                                        stroke="rgba(255, 255, 255, 0.05)" />
-
-                                    <!-- Rear Window -->
-                                    <path d="M38 168 L92 168 L98 190 C85 195, 45 195, 32 190 Z" fill="#14100E"
-                                        stroke="rgba(217, 154, 98, 0.2)" />
-
-                                    <!-- Front Headlights (Warm Ivory Glow) -->
-                                    <path d="M24 38 C28 30, 36 26, 42 25" stroke="#E8D8C4" stroke-width="3"
-                                        stroke-linecap="round" />
-                                    <path d="M106 38 C102 30, 94 26, 88 25" stroke="#E8D8C4" stroke-width="3"
-                                        stroke-linecap="round" />
-
-                                    <!-- Rear Taillights (Signal Red Glow) -->
-                                    <path d="M26 218 C35 226, 95 226, 104 218" stroke="#FF6B6B" stroke-width="3"
-                                        stroke-linecap="round" />
-
-                                    <!-- Subtle Center Glow Line -->
-                                    <circle cx="65" cy="128" r="4" fill="#D99A62" />
-                                </svg>
+                            <div class="metric-value-row">
+                                <span class="metric-value" id="cardSpeed">95</span>
+                                <span class="metric-unit">km/h</span>
                             </div>
+                            <div class="metric-progress">
+                                <div class="metric-progress-fill fill-copper" id="barSpeed" style="width: 70%;"></div>
+                            </div>
+                            <div class="metric-footer">
+                                <span>Avg (last 10 min)</span>
+                            </div>
+                        </div>
 
-                            <!-- Bottom-Left: Tyre Pressure -->
-                            <div class="car-node node-bottom-left" id="nodeTyre">
-                                <div class="node-icon-box node-icon-copper">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <!-- 4. Battery Temp -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span>Battery Temp</span>
+                                <div class="metric-icon-wrap">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="metric-value-row">
+                                <span class="metric-value" id="cardBattTemp">42.7</span>
+                                <span class="metric-unit">°C</span>
+                            </div>
+                            <div class="metric-progress">
+                                <div class="metric-progress-fill fill-green" id="barTemp" style="width: 45%;"></div>
+                            </div>
+                            <div class="metric-footer">
+                                <span id="cardTempTag" class="metric-tag-healthy">Normal range</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Tyre Pressure -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span>Tyre Pressure</span>
+                                <div class="metric-icon-wrap">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
                                         <circle cx="12" cy="12" r="10" />
                                         <circle cx="12" cy="12" r="4" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <div class="node-label">Tyre Pressure</div>
-                                    <div class="node-val" id="nodeTyreVal">34 psi</div>
-                                    <div class="node-sub" id="nodeTyreSub">All normal</div>
+                            </div>
+                            <div class="metric-value-row">
+                                <span class="metric-value" id="cardTyre">34</span>
+                                <span class="metric-unit">psi</span>
+                            </div>
+                            <div class="metric-progress">
+                                <div class="metric-progress-fill fill-green" id="barTyre" style="width: 85%;"></div>
+                            </div>
+                            <div class="metric-footer">
+                                <span id="cardTyreTag" class="metric-tag-healthy">All tyres normal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- --- Row 2: Middle Grid (Vehicle Status & Recent Alerts) --- -->
+                    <div class="middle-grid">
+
+                        <!-- Vehicle Status with Top-down Car Wireframe -->
+                        <div class="dashboard-card">
+                            <div class="card-header-bar">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                        color="var(--accent-copper)">
+                                        <circle cx="12" cy="4" r="2" />
+                                        <circle cx="4" cy="12" r="2" />
+                                        <circle cx="20" cy="12" r="2" />
+                                        <circle cx="12" cy="20" r="2" />
+                                    </svg>
+                                    <span>Vehicle Status</span>
                                 </div>
+                                <span style="font-size: 11px; color: var(--text-muted);">Real-time Telemetry</span>
                             </div>
 
-                            <!-- Bottom-Right: Brakes -->
-                            <div class="car-node node-bottom-right" id="nodeBrakes">
-                                <div class="node-icon-box node-icon-copper">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
+                            <div class="vehicle-stage" id="vehicleStage">
+                                <!-- Connecting Dotted Vectors (Dynamically Calculated) -->
+                                <svg class="node-line" id="vehicleNodeLines" width="100%" height="100%">
+                                    <!-- Left Front (Battery) line -->
+                                    <line id="lineBattery" x1="130" y1="52" x2="200" y2="100" />
+                                    <!-- Right Front (Motor) line -->
+                                    <line id="lineMotor" x1="330" y1="52" x2="260" y2="100" />
+                                    <!-- Left Rear (Tyres) line -->
+                                    <line id="lineTyre" x1="130" y1="230" x2="200" y2="190" />
+                                    <!-- Right Rear (Brakes) line -->
+                                    <line id="lineBrakes" x1="330" y1="230" x2="260" y2="190" />
+
+                                    <!-- Chassis Docking Anchor Dots -->
+                                    <circle id="dotBattery" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                    <circle id="dotMotor" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                    <circle id="dotTyre" cx="0" cy="0" r="3.5" class="chassis-dot" />
+                                    <circle id="dotBrakes" cx="0" cy="0" r="3.5" class="chassis-dot" />
+
+                                    <!-- Card Anchor Dots -->
+                                    <circle id="dotCardBattery" cx="0" cy="0" r="2.5" class="card-dot" />
+                                    <circle id="dotCardMotor" cx="0" cy="0" r="2.5" class="card-dot" />
+                                    <circle id="dotCardTyre" cx="0" cy="0" r="2.5" class="card-dot" />
+                                    <circle id="dotCardBrakes" cx="0" cy="0" r="2.5" class="card-dot" />
+                                </svg>
+
+                                <!-- Top-Left: Battery -->
+                                <div class="car-node node-top-left" id="nodeBattery">
+                                    <div class="node-icon-box node-icon-green">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="7" width="16" height="10" rx="2" />
+                                            <line x1="22" y1="11" x2="22" y2="13" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="node-label">Battery</div>
+                                        <div class="node-val" id="nodeBatteryVal">78%</div>
+                                        <div class="node-sub" id="nodeBatterySub">302 km</div>
+                                    </div>
+                                </div>
+
+                                <!-- Top-Right: Motor Temp -->
+                                <div class="car-node node-top-right" id="nodeMotor">
+                                    <div class="node-icon-box node-icon-copper">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <rect x="4" y="4" width="16" height="16" rx="2" />
+                                            <path d="M9 9h6v6H9z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="node-label">Motor Temp</div>
+                                        <div class="node-val" id="nodeMotorVal">42.7 °C</div>
+                                        <div class="node-sub">Normal</div>
+                                    </div>
+                                </div>
+
+                                <!-- Central Top-Down Car Silhouette (Sleek Dark Modern Sedan) -->
+                                <div class="car-svg-wrap" id="carSvgWrap">
+                                    <svg width="130" height="250" viewBox="0 0 130 250" fill="none">
+                                        <!-- Wheels -->
+                                        <rect x="8" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
+                                        <rect x="112" y="40" width="10" height="32" rx="4" fill="#0E0B09" />
+                                        <rect x="8" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
+                                        <rect x="112" y="170" width="10" height="32" rx="4" fill="#0E0B09" />
+
+                                        <!-- Car Body Base Shadow -->
+                                        <path
+                                            d="M22 60 C22 25, 45 12, 65 12 C85 12, 108 25, 108 60 L110 180 C110 215, 95 238, 65 238 C35 238, 20 215, 20 180 Z"
+                                            fill="#241E1A" stroke="#3D332B" stroke-width="2" />
+
+                                        <!-- Hood Lines -->
+                                        <path d="M36 28 C45 22, 85 22, 94 28" stroke="rgba(217, 154, 98, 0.4)"
+                                            stroke-width="1.5" stroke-linecap="round" />
+
+                                        <!-- Windshield Front -->
+                                        <path d="M30 65 L40 92 L90 92 L100 65 C85 58, 45 58, 30 65 Z" fill="#14100E"
+                                            stroke="rgba(217, 154, 98, 0.25)" />
+
+                                        <!-- Panoramic Glass Roof -->
+                                        <path d="M38 98 L92 98 L90 160 L40 160 Z" fill="#181310"
+                                            stroke="rgba(255, 255, 255, 0.05)" />
+
+                                        <!-- Rear Window -->
+                                        <path d="M38 168 L92 168 L98 190 C85 195, 45 195, 32 190 Z" fill="#14100E"
+                                            stroke="rgba(217, 154, 98, 0.2)" />
+
+                                        <!-- Front Headlights (Warm Ivory Glow) -->
+                                        <path d="M24 38 C28 30, 36 26, 42 25" stroke="#E8D8C4" stroke-width="3"
+                                            stroke-linecap="round" />
+                                        <path d="M106 38 C102 30, 94 26, 88 25" stroke="#E8D8C4" stroke-width="3"
+                                            stroke-linecap="round" />
+
+                                        <!-- Rear Taillights (Signal Red Glow) -->
+                                        <path d="M26 218 C35 226, 95 226, 104 218" stroke="#FF6B6B" stroke-width="3"
+                                            stroke-linecap="round" />
+
+                                        <!-- Subtle Center Glow Line -->
+                                        <circle cx="65" cy="128" r="4" fill="#D99A62" />
+                                    </svg>
+                                </div>
+
+                                <!-- Bottom-Left: Tyre Pressure -->
+                                <div class="car-node node-bottom-left" id="nodeTyre">
+                                    <div class="node-icon-box node-icon-copper">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <circle cx="12" cy="12" r="4" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="node-label">Tyre Pressure</div>
+                                        <div class="node-val" id="nodeTyreVal">34 psi</div>
+                                        <div class="node-sub" id="nodeTyreSub">All normal</div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom-Right: Brakes -->
+                                <div class="car-node node-bottom-right" id="nodeBrakes">
+                                    <div class="node-icon-box node-icon-copper">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="9" />
+                                            <path d="M12 7v10M7 12h10" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="node-label">Brakes</div>
+                                        <div class="node-val">OK</div>
+                                        <div class="node-sub">Normal</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Alerts Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header-bar">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                    </svg>
+                                    <span>Recent Alerts</span>
+                                </div>
+                                <a href="#alerts" class="card-action-link">View All →</a>
+                            </div>
+
+                            <div class="alerts-list" id="alertsListContainer">
+                                <!-- Alert 1: Overheat Warning -->
+                                <div class="alert-row">
+                                    <div class="alert-main">
+                                        <div class="alert-icon-wrap icon-warning">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path
+                                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                                <line x1="12" y1="9" x2="12" y2="13" />
+                                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="alert-title">Battery overheating warning</div>
+                                            <div class="alert-desc">Temperature increased to 55.1 °C</div>
+                                        </div>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <span>18:54</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Alert 2: ADAS -->
+                                <div class="alert-row">
+                                    <div class="alert-main">
+                                        <div class="alert-icon-wrap icon-warning">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path
+                                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                                <line x1="12" y1="9" x2="12" y2="13" />
+                                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="alert-title">ADAS disengagement</div>
+                                            <div class="alert-desc">Lane markings not detected</div>
+                                        </div>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <span>18:44</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Alert 3: ADAS -->
+                                <div class="alert-row">
+                                    <div class="alert-main">
+                                        <div class="alert-icon-wrap icon-warning">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path
+                                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                                <line x1="12" y1="9" x2="12" y2="13" />
+                                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="alert-title">ADAS disengagement</div>
+                                            <div class="alert-desc">Lane markings not detected</div>
+                                        </div>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <span>18:18</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Alert 4: Tyre Normal -->
+                                <div class="alert-row">
+                                    <div class="alert-main">
+                                        <div class="alert-icon-wrap icon-healthy">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="alert-title">Tyre pressure normal</div>
+                                            <div class="alert-desc">All tyres within range</div>
+                                        </div>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <span>17:52</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Alert 5: Critical Motor Temp -->
+                                <div class="alert-row">
+                                    <div class="alert-main">
+                                        <div class="alert-icon-wrap icon-critical">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <line x1="15" y1="9" x2="9" y2="15" />
+                                                <line x1="9" y1="9" x2="15" y2="15" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="alert-title">High motor temperature</div>
+                                            <div class="alert-desc">Temperature exceeded 95 °C</div>
+                                        </div>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <span>16:21</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- --- Row 3: Bottom Grid (Charts & Status & Insights) --- -->
+                    <div class="bottom-grid">
+
+                        <!-- Battery Temp Trend Chart -->
+                        <div class="dashboard-card">
+                            <div class="chart-header">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                    </svg>
+                                    <span>Battery Temperature Trend</span>
+                                </div>
+                                <div class="chart-badge-tag">55.1 °C · 18:54</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="battTempChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Speed Trend Chart -->
+                        <div class="dashboard-card">
+                            <div class="chart-header">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M16 12l-4-4v8" />
+                                    </svg>
+                                    <span>Speed Trend</span>
+                                </div>
+                                <span style="font-size: 11px; color: var(--text-muted);">km/h</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="speedTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- --- Row 4: Component Status & Quick Insights --- -->
+                    <div class="bottom-cards-row">
+                        <!-- Component Status -->
+                        <div class="dashboard-card">
+                            <div class="card-header-bar">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                                        <polyline points="2 17 12 22 22 17" />
+                                        <polyline points="2 12 12 17 22 12" />
+                                    </svg>
+                                    <span>Component Status</span>
+                                </div>
+                                <a href="/analytics" class="card-action-link">View Details →</a>
+                            </div>
+
+                            <div class="component-status-grid">
+                                <div class="component-pill">
+                                    <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="7" width="16" height="10" rx="2" />
+                                        <line x1="22" y1="11" x2="22" y2="13" />
+                                    </svg>
+                                    <span class="c-title">Battery</span>
+                                    <span class="c-value" id="compBattery">78%</span>
+                                    <span class="c-status">Good</span>
+                                </div>
+
+                                <div class="component-pill">
+                                    <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="4" y="4" width="16" height="16" rx="2" />
+                                        <path d="M9 9h6v6H9z" />
+                                    </svg>
+                                    <span class="c-title">Motor</span>
+                                    <span class="c-value">42.7 °C</span>
+                                    <span class="c-status">Normal</span>
+                                </div>
+
+                                <div class="component-pill">
+                                    <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                    <span class="c-title">Tyres</span>
+                                    <span class="c-value" id="compTyre">34 psi</span>
+                                    <span class="c-status">Normal</span>
+                                </div>
+
+                                <div class="component-pill">
+                                    <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="9" />
                                         <path d="M12 7v10M7 12h10" />
                                     </svg>
-                                </div>
-                                <div>
-                                    <div class="node-label">Brakes</div>
-                                    <div class="node-val">OK</div>
-                                    <div class="node-sub">Normal</div>
+                                    <span class="c-title">Brakes</span>
+                                    <span class="c-value">OK</span>
+                                    <span class="c-status">Normal</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Recent Alerts Card -->
-                    <div class="dashboard-card">
-                        <div class="card-header-bar">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" color="var(--accent-copper)">
-                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                                </svg>
-                                <span>Recent Alerts</span>
-                            </div>
-                            <a href="#alerts" class="card-action-link">View All →</a>
-                        </div>
-
-                        <div class="alerts-list" id="alertsListContainer">
-                            <!-- Alert 1: Overheat Warning -->
-                            <div class="alert-row">
-                                <div class="alert-main">
-                                    <div class="alert-icon-wrap icon-warning">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path
-                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                            <line x1="12" y1="9" x2="12" y2="13" />
-                                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="alert-title">Battery overheating warning</div>
-                                        <div class="alert-desc">Temperature increased to 55.1 °C</div>
-                                    </div>
-                                </div>
-                                <div class="alert-meta">
-                                    <span>18:54</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Alert 2: ADAS -->
-                            <div class="alert-row">
-                                <div class="alert-main">
-                                    <div class="alert-icon-wrap icon-warning">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path
-                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                            <line x1="12" y1="9" x2="12" y2="13" />
-                                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="alert-title">ADAS disengagement</div>
-                                        <div class="alert-desc">Lane markings not detected</div>
-                                    </div>
-                                </div>
-                                <div class="alert-meta">
-                                    <span>18:44</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Alert 3: ADAS -->
-                            <div class="alert-row">
-                                <div class="alert-main">
-                                    <div class="alert-icon-wrap icon-warning">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path
-                                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                            <line x1="12" y1="9" x2="12" y2="13" />
-                                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="alert-title">ADAS disengagement</div>
-                                        <div class="alert-desc">Lane markings not detected</div>
-                                    </div>
-                                </div>
-                                <div class="alert-meta">
-                                    <span>18:18</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Alert 4: Tyre Normal -->
-                            <div class="alert-row">
-                                <div class="alert-main">
-                                    <div class="alert-icon-wrap icon-healthy">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="alert-title">Tyre pressure normal</div>
-                                        <div class="alert-desc">All tyres within range</div>
-                                    </div>
-                                </div>
-                                <div class="alert-meta">
-                                    <span>17:52</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Alert 5: Critical Motor Temp -->
-                            <div class="alert-row">
-                                <div class="alert-main">
-                                    <div class="alert-icon-wrap icon-critical">
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10" />
-                                            <line x1="15" y1="9" x2="9" y2="15" />
-                                            <line x1="9" y1="9" x2="15" y2="15" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <div class="alert-title">High motor temperature</div>
-                                        <div class="alert-desc">Temperature exceeded 95 °C</div>
-                                    </div>
-                                </div>
-                                <div class="alert-meta">
-                                    <span>16:21</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- --- Row 3: Bottom Grid (Charts & Status & Insights) --- -->
-                <div class="bottom-grid">
-
-                    <!-- Battery Temp Trend Chart -->
-                    <div class="dashboard-card">
-                        <div class="chart-header">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" color="var(--accent-copper)">
-                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-                                </svg>
-                                <span>Battery Temperature Trend</span>
-                            </div>
-                            <div class="chart-badge-tag">55.1 °C · 18:54</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="battTempChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Speed Trend Chart -->
-                    <div class="dashboard-card">
-                        <div class="chart-header">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" color="var(--accent-copper)">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M16 12l-4-4v8" />
-                                </svg>
-                                <span>Speed Trend</span>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-muted);">km/h</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="speedTrendChart"></canvas>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- --- Row 4: Component Status & Quick Insights --- -->
-                <div class="bottom-cards-row">
-                    <!-- Component Status -->
-                    <div class="dashboard-card">
-                        <div class="card-header-bar">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" color="var(--accent-copper)">
-                                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                                    <polyline points="2 17 12 22 22 17" />
-                                    <polyline points="2 12 12 17 22 12" />
-                                </svg>
-                                <span>Component Status</span>
-                            </div>
-                            <a href="/analytics" class="card-action-link">View Details →</a>
-                        </div>
-
-                        <div class="component-status-grid">
-                            <div class="component-pill">
-                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <rect x="2" y="7" width="16" height="10" rx="2" />
-                                    <line x1="22" y1="11" x2="22" y2="13" />
-                                </svg>
-                                <span class="c-title">Battery</span>
-                                <span class="c-value" id="compBattery">78%</span>
-                                <span class="c-status">Good</span>
-                            </div>
-
-                            <div class="component-pill">
-                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <rect x="4" y="4" width="16" height="16" rx="2" />
-                                    <path d="M9 9h6v6H9z" />
-                                </svg>
-                                <span class="c-title">Motor</span>
-                                <span class="c-value">42.7 °C</span>
-                                <span class="c-status">Normal</span>
-                            </div>
-
-                            <div class="component-pill">
-                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <circle cx="12" cy="12" r="4" />
-                                </svg>
-                                <span class="c-title">Tyres</span>
-                                <span class="c-value" id="compTyre">34 psi</span>
-                                <span class="c-status">Normal</span>
-                            </div>
-
-                            <div class="component-pill">
-                                <svg class="c-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="9" />
-                                    <path d="M12 7v10M7 12h10" />
-                                </svg>
-                                <span class="c-title">Brakes</span>
-                                <span class="c-value">OK</span>
-                                <span class="c-status">Normal</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Insights -->
-                    <div class="dashboard-card">
-                        <div class="card-header-bar">
-                            <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" color="var(--accent-copper)">
-                                    <line x1="18" y1="20" x2="18" y2="10" />
-                                    <line x1="12" y1="20" x2="12" y2="4" />
-                                    <line x1="6" y1="20" x2="6" y2="14" />
-                                </svg>
-                                <span>Quick Insights</span>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-dim);">Last 24 hours</span>
-                        </div>
-
-                        <div class="insights-grid">
-                            <div class="insight-item">
-                                <div class="insight-header">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" color="var(--status-healthy)">
-                                        <path
-                                            d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-                                    </svg>
-                                    <span>Energy usage</span>
-                                </div>
-                                <div class="insight-value">15.2 <span
-                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">kWh/100km</span>
-                                </div>
-                                <div class="insight-trend trend-good">↓ 8% vs yesterday</div>
-                            </div>
-
-                            <div class="insight-item">
-                                <div class="insight-header">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <!-- Quick Insights -->
+                        <div class="dashboard-card">
+                            <div class="card-header-bar">
+                                <div class="card-title-group">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" color="var(--accent-copper)">
-                                        <line x1="4" y1="19" x2="8" y2="5" />
-                                        <line x1="20" y1="19" x2="16" y2="5" />
+                                        <line x1="18" y1="20" x2="18" y2="10" />
+                                        <line x1="12" y1="20" x2="12" y2="4" />
+                                        <line x1="6" y1="20" x2="6" y2="14" />
                                     </svg>
-                                    <span>Avg. speed</span>
+                                    <span>Quick Insights</span>
                                 </div>
-                                <div class="insight-value">95.3 <span
-                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">km/h</span>
-                                </div>
-                                <div class="insight-trend trend-warn">↑ 12% vs yesterday</div>
+                                <span style="font-size: 11px; color: var(--text-dim);">Last 24 hours</span>
                             </div>
 
-                            <div class="insight-item">
-                                <div class="insight-header">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" color="var(--status-healthy)">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                        <circle cx="12" cy="10" r="3" />
-                                    </svg>
-                                    <span>Distance</span>
+                            <div class="insights-grid">
+                                <div class="insight-item">
+                                    <div class="insight-header">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" color="var(--status-healthy)">
+                                            <path
+                                                d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                                        </svg>
+                                        <span>Energy usage</span>
+                                    </div>
+                                    <div class="insight-value">15.2 <span
+                                            style="font-size:11px; font-weight:normal; color:var(--text-muted);">kWh/100km</span>
+                                    </div>
+                                    <div class="insight-trend trend-good">↓ 8% vs yesterday</div>
                                 </div>
-                                <div class="insight-value">182 <span
-                                        style="font-size:11px; font-weight:normal; color:var(--text-muted);">km</span>
+
+                                <div class="insight-item">
+                                    <div class="insight-header">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
+                                            <line x1="4" y1="19" x2="8" y2="5" />
+                                            <line x1="20" y1="19" x2="16" y2="5" />
+                                        </svg>
+                                        <span>Avg. speed</span>
+                                    </div>
+                                    <div class="insight-value">95.3 <span
+                                            style="font-size:11px; font-weight:normal; color:var(--text-muted);">km/h</span>
+                                    </div>
+                                    <div class="insight-trend trend-warn">↑ 12% vs yesterday</div>
                                 </div>
-                                <div class="insight-trend trend-good">↑ 5% vs yesterday</div>
+
+                                <div class="insight-item">
+                                    <div class="insight-header">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" color="var(--status-healthy)">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                            <circle cx="12" cy="10" r="3" />
+                                        </svg>
+                                        <span>Distance</span>
+                                    </div>
+                                    <div class="insight-value">182 <span
+                                            style="font-size:11px; font-weight:normal; color:var(--text-muted);">km</span>
+                                    </div>
+                                    <div class="insight-trend trend-good">↑ 5% vs yesterday</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div><!-- /pane-dashboard -->
 
                 <!-- ================= TAB 2: ANALYTICS (TRENDS) ================= -->
@@ -787,19 +784,22 @@
                     <div class="view-header-bar">
                         <div class="view-title-group">
                             <div class="view-title">Telemetry Trend Analytics</div>
-                            <div class="view-subtitle">Real-time multi-signal telemetry streams & historical trends</div>
+                            <div class="view-subtitle">Real-time multi-signal telemetry streams & historical trends
+                            </div>
                         </div>
                         <div class="view-header-actions">
                             <div class="filter-pill-group">
-                                <button class="filter-pill active" onclick="setAnalyticsRange('10m', this)">10m Live</button>
+                                <button class="filter-pill active" onclick="setAnalyticsRange('10m', this)">10m
+                                    Live</button>
                                 <button class="filter-pill" onclick="setAnalyticsRange('1h', this)">1 Hour</button>
                                 <button class="filter-pill" onclick="setAnalyticsRange('24h', this)">24 Hours</button>
                                 <button class="filter-pill" onclick="setAnalyticsRange('7d', this)">7 Days</button>
                             </div>
                             <button class="btn-action-copper" onclick="loadData()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polyline points="23 4 23 10 17 10"/>
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="23 4 23 10 17 10" />
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                                 </svg>
                                 <span>Sync Telemetry</span>
                             </button>
@@ -813,9 +813,10 @@
                         <div class="analytics-chart-card">
                             <div class="analytics-chart-header">
                                 <div class="analytics-chart-title">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <path d="M16 12l-4-4v8"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M16 12l-4-4v8" />
                                     </svg>
                                     <span>Vehicle Speed Trend (km/h)</span>
                                 </div>
@@ -833,14 +834,16 @@
                         <div class="analytics-chart-card">
                             <div class="analytics-chart-header">
                                 <div class="analytics-chart-title">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                        <rect x="2" y="7" width="16" height="10" rx="2"/>
-                                        <line x1="22" y1="11" x2="22" y2="13"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <rect x="2" y="7" width="16" height="10" rx="2" />
+                                        <line x1="22" y1="11" x2="22" y2="13" />
                                     </svg>
                                     <span>Battery State of Charge (%)</span>
                                 </div>
                                 <div class="analytics-stat-chips">
-                                    <span class="stat-chip healthy">Level: <strong id="anBatteryCurrent">78%</strong></span>
+                                    <span class="stat-chip healthy">Level: <strong
+                                            id="anBatteryCurrent">78%</strong></span>
                                     <span class="stat-chip">Range: <strong id="anBatteryRange">302 km</strong></span>
                                 </div>
                             </div>
@@ -853,14 +856,16 @@
                         <div class="analytics-chart-card">
                             <div class="analytics-chart-header">
                                 <div class="analytics-chart-title">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
                                     </svg>
                                     <span>Battery & Motor Thermal Trend (°C)</span>
                                 </div>
                                 <div class="analytics-stat-chips">
                                     <span class="stat-chip">Limit: <strong>50.0 °C</strong></span>
-                                    <span class="stat-chip warning">Current: <strong id="anTempCurrent">42.7 °C</strong></span>
+                                    <span class="stat-chip warning">Current: <strong id="anTempCurrent">42.7
+                                            °C</strong></span>
                                 </div>
                             </div>
                             <div class="analytics-canvas-wrap">
@@ -872,14 +877,16 @@
                         <div class="analytics-chart-card">
                             <div class="analytics-chart-header">
                                 <div class="analytics-chart-title">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <circle cx="12" cy="12" r="4"/>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" color="var(--accent-copper)">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <circle cx="12" cy="12" r="4" />
                                     </svg>
                                     <span>Tyre Pressure Stability (psi)</span>
                                 </div>
                                 <div class="analytics-stat-chips">
-                                    <span class="stat-chip healthy">Status: <strong id="anTyreStatus">Nominal</strong></span>
+                                    <span class="stat-chip healthy">Status: <strong
+                                            id="anTyreStatus">Nominal</strong></span>
                                     <span class="stat-chip">Avg: <strong id="anTyreCurrent">34 psi</strong></span>
                                 </div>
                             </div>
@@ -894,17 +901,19 @@
                     <div class="telemetry-table-card">
                         <div class="card-header-bar" style="margin-bottom:0;">
                             <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <line x1="8" y1="6" x2="21" y2="6"/>
-                                    <line x1="8" y1="12" x2="21" y2="12"/>
-                                    <line x1="8" y1="18" x2="21" y2="18"/>
-                                    <line x1="3" y1="6" x2="3.01" y2="6"/>
-                                    <line x1="3" y1="12" x2="3.01" y2="12"/>
-                                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <line x1="8" y1="6" x2="21" y2="6" />
+                                    <line x1="8" y1="12" x2="21" y2="12" />
+                                    <line x1="8" y1="18" x2="21" y2="18" />
+                                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                                    <line x1="3" y1="18" x2="3.01" y2="18" />
                                 </svg>
                                 <span>Recent Telemetry Broadcast Frames</span>
                             </div>
-                            <span style="font-size: 11px; color: var(--text-dim);">Live Ingestion Buffer (Last 10 frames)</span>
+                            <span style="font-size: 11px; color: var(--text-dim);">Live Ingestion Buffer (Last 10
+                                frames)</span>
                         </div>
                         <div class="telemetry-table-wrap">
                             <table class="telemetry-table">
@@ -934,14 +943,19 @@
                     <div class="view-header-bar">
                         <div class="view-title-group">
                             <div class="view-title">Diagnostics & Vehicle Alerts</div>
-                            <div class="view-subtitle">Diagnostic Trouble Codes (DTC), ADAS handover events, and thermal anomalies</div>
+                            <div class="view-subtitle">Diagnostic Trouble Codes (DTC), ADAS handover events, and thermal
+                                anomalies</div>
                         </div>
                         <div class="view-header-actions">
                             <div class="filter-pill-group" id="alertFilterGroup">
-                                <button class="filter-pill active" onclick="filterAlertCards('all', this)">All (5)</button>
-                                <button class="filter-pill" onclick="filterAlertCards('critical', this)">Critical (2)</button>
-                                <button class="filter-pill" onclick="filterAlertCards('warning', this)">Warnings (2)</button>
-                                <button class="filter-pill" onclick="filterAlertCards('healthy', this)">Resolved (1)</button>
+                                <button class="filter-pill active" onclick="filterAlertCards('all', this)">All
+                                    (5)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('critical', this)">Critical
+                                    (2)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('warning', this)">Warnings
+                                    (2)</button>
+                                <button class="filter-pill" onclick="filterAlertCards('healthy', this)">Resolved
+                                    (1)</button>
                             </div>
                         </div>
                     </div>
@@ -989,17 +1003,23 @@
                                 <span class="sev-tag sev-critical">CRITICAL</span>
                                 <div class="alert-row-body">
                                     <div class="alert-row-header">
-                                        <span class="alert-row-title">Battery Pack Core Temperature Spiked to 55.1 °C</span>
+                                        <span class="alert-row-title">Battery Pack Core Temperature Spiked to 55.1
+                                            °C</span>
                                         <span class="data-source-pill">Telemetry Event · DTC P0A7E</span>
                                         <span class="alert-row-meta">18:54:02 · BMS Sensor THM-MOD-04</span>
                                     </div>
-                                    <div class="alert-row-desc">Exceeded thermal safety threshold (50.0 °C) under sustained highway load. Active cooling loop engaged.</div>
+                                    <div class="alert-row-desc">Exceeded thermal safety threshold (50.0 °C) under
+                                        sustained highway load. Active cooling loop engaged.</div>
                                 </div>
                             </div>
                             <div class="alert-card-right">
-                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Why did the battery overheat?')">
+                                <button class="alert-ask-vgpt-btn"
+                                    onclick="askQuestion('Why did the battery overheat?')">
                                     <span>Investigate</span>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1014,13 +1034,18 @@
                                         <span class="data-source-pill">Telemetry Event · DTC P0A2B</span>
                                         <span class="alert-row-meta">16:21:40 · EDU Inverter Stator Phase C</span>
                                     </div>
-                                    <div class="alert-row-desc">Motor winding temperature reached 95.4 °C under high torque demand. Autonomous torque derate protocol applied.</div>
+                                    <div class="alert-row-desc">Motor winding temperature reached 95.4 °C under high
+                                        torque demand. Autonomous torque derate protocol applied.</div>
                                 </div>
                             </div>
                             <div class="alert-card-right">
-                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('What was the highest battery temperature yesterday?')">
+                                <button class="alert-ask-vgpt-btn"
+                                    onclick="askQuestion('What was the highest battery temperature yesterday?')">
                                     <span>Investigate</span>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1035,13 +1060,18 @@
                                         <span class="data-source-pill">Telemetry Event · ADAS Handover</span>
                                         <span class="alert-row-meta">18:44:11 · Forward Vision ECU · 104 km/h</span>
                                     </div>
-                                    <div class="alert-row-desc">Forward optical camera confidence dropped below 60% due to degraded lane markings. Control yielded to driver.</div>
+                                    <div class="alert-row-desc">Forward optical camera confidence dropped below 60% due
+                                        to degraded lane markings. Control yielded to driver.</div>
                                 </div>
                             </div>
                             <div class="alert-card-right">
-                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Show ADAS disengagement events from yesterday')">
+                                <button class="alert-ask-vgpt-btn"
+                                    onclick="askQuestion('Show ADAS disengagement events from yesterday')">
                                     <span>Investigate</span>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1056,13 +1086,17 @@
                                         <span class="data-source-pill">Telemetry Event · Sensor Attenuation</span>
                                         <span class="alert-row-meta">18:18:29 · Perception Fusion ECU</span>
                                     </div>
-                                    <div class="alert-row-desc">Low evening sun angle saturated camera CMOS sensor for 12 seconds. AEB sensitivity temporarily scaled.</div>
+                                    <div class="alert-row-desc">Low evening sun angle saturated camera CMOS sensor for
+                                        12 seconds. AEB sensitivity temporarily scaled.</div>
                                 </div>
                             </div>
                             <div class="alert-card-right">
                                 <button class="alert-ask-vgpt-btn" onclick="askQuestion('Show yesterday alerts')">
                                     <span>Investigate</span>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1075,15 +1109,21 @@
                                     <div class="alert-row-header">
                                         <span class="alert-row-title">Tyre Pressures Nominal Across All 4 Wheels</span>
                                         <span class="data-source-pill">Baseline Check · TPMS</span>
-                                        <span class="alert-row-meta">17:52:14 · TPMS Sensor Mesh (FL/FR 34, RL/RR 35 psi)</span>
+                                        <span class="alert-row-meta">17:52:14 · TPMS Sensor Mesh (FL/FR 34, RL/RR 35
+                                            psi)</span>
                                     </div>
-                                    <div class="alert-row-desc">Cold-start pressures stabilized at operating levels. No slow punctures, imbalances, or pressure leaks detected.</div>
+                                    <div class="alert-row-desc">Cold-start pressures stabilized at operating levels. No
+                                        slow punctures, imbalances, or pressure leaks detected.</div>
                                 </div>
                             </div>
                             <div class="alert-card-right">
-                                <button class="alert-ask-vgpt-btn" onclick="askQuestion('Are there any tyre pressure anomalies?')">
+                                <button class="alert-ask-vgpt-btn"
+                                    onclick="askQuestion('Are there any tyre pressure anomalies?')">
                                     <span>Verify</span>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -1096,28 +1136,34 @@
                     <div class="view-header-bar">
                         <div class="view-title-group">
                             <div class="view-title">Vehicle Health & Diagnostic Report</div>
-                            <div class="view-subtitle">Automated inspection certificate, subsystem telemetry audit, and maintenance outlook</div>
+                            <div class="view-subtitle">Automated inspection certificate, subsystem telemetry audit, and
+                                maintenance outlook</div>
                         </div>
                         <div class="view-header-actions">
                             <button class="btn-action-copper" onclick="window.print()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 6 2 18 2 18 9"/>
-                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                                    <rect x="6" y="14" width="12" height="8"/>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="6 9 6 2 18 2 18 9" />
+                                    <path
+                                        d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                    <rect x="6" y="14" width="12" height="8" />
                                 </svg>
                                 <span>Print / Export PDF</span>
                             </button>
                             <button class="btn-action-graphite" onclick="downloadDiagnosticReport()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="7 10 12 15 17 10"/>
-                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
                                 </svg>
                                 <span>Export JSON</span>
                             </button>
-                            <button class="btn-action-copper" onclick="askQuestion('Generate a full diagnostic health summary report for my vehicle')">
+                            <button class="btn-action-copper"
+                                onclick="askQuestion('Generate a full diagnostic health summary report for my vehicle')">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2L14.2 8.3L20.5 10.5L14.2 12.7L12 19L9.8 12.7L3.5 10.5L9.8 8.3L12 2Z"/>
+                                    <path
+                                        d="M12 2L14.2 8.3L20.5 10.5L14.2 12.7L12 19L9.8 12.7L3.5 10.5L9.8 8.3L12 2Z" />
                                 </svg>
                                 <span>AI Diagnostic Scan</span>
                             </button>
@@ -1141,8 +1187,10 @@
                         <div class="report-health-badge-box">
                             <div class="report-health-score-big" id="reportHealthScore">86</div>
                             <div>
-                                <div style="font-weight:700; color:var(--text-ivory-bright); font-size:14px;">Health Grade: A</div>
-                                <div style="font-size:11px; color:var(--status-healthy);">Nominal Operating Condition</div>
+                                <div style="font-weight:700; color:var(--text-ivory-bright); font-size:14px;">Health
+                                    Grade: A</div>
+                                <div style="font-size:11px; color:var(--status-healthy);">Nominal Operating Condition
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1156,7 +1204,8 @@
                                 <span class="alert-card-badge badge-healthy">Good</span>
                             </div>
                             <div class="subsystem-metric">94% SoH</div>
-                            <div class="subsystem-desc">LFP chemistry with 142 total charge cycles. Cell-to-cell delta voltage is 0.012V (well within 0.030V tolerance).</div>
+                            <div class="subsystem-desc">LFP chemistry with 142 total charge cycles. Cell-to-cell delta
+                                voltage is 0.012V (well within 0.030V tolerance).</div>
                         </div>
 
                         <div class="subsystem-card">
@@ -1165,7 +1214,8 @@
                                 <span class="alert-card-badge badge-healthy">Optimal</span>
                             </div>
                             <div class="subsystem-metric">98.2%</div>
-                            <div class="subsystem-desc">Permanent magnet synchronous motor showing minimal inverter harmonic distortion. Insulation resistance: 520 MΩ.</div>
+                            <div class="subsystem-desc">Permanent magnet synchronous motor showing minimal inverter
+                                harmonic distortion. Insulation resistance: 520 MΩ.</div>
                         </div>
 
                         <div class="subsystem-card">
@@ -1174,7 +1224,8 @@
                                 <span class="alert-card-badge badge-warning">Attention</span>
                             </div>
                             <div class="subsystem-metric">82 / 100</div>
-                            <div class="subsystem-desc">1 thermal spike logged (55.1 °C). Radiator intake airflow acceptable. Recommend inspection of cooling radiator grille.</div>
+                            <div class="subsystem-desc">1 thermal spike logged (55.1 °C). Radiator intake airflow
+                                acceptable. Recommend inspection of cooling radiator grille.</div>
                         </div>
 
                         <div class="subsystem-card">
@@ -1183,7 +1234,8 @@
                                 <span class="alert-card-badge badge-healthy">Optimal</span>
                             </div>
                             <div class="subsystem-metric">99 / 100</div>
-                            <div class="subsystem-desc">Blended regen recovers 28% of deceleration energy. Friction brake pad wear estimated at less than 15%.</div>
+                            <div class="subsystem-desc">Blended regen recovers 28% of deceleration energy. Friction
+                                brake pad wear estimated at less than 15%.</div>
                         </div>
 
                         <div class="subsystem-card">
@@ -1192,7 +1244,8 @@
                                 <span class="alert-card-badge badge-warning">2 Events</span>
                             </div>
                             <div class="subsystem-metric">90 / 100</div>
-                            <div class="subsystem-desc">Forward radar and front stereo camera calibrated. 2 driver handovers logged over 24h due to low sun glare and faded lane lines.</div>
+                            <div class="subsystem-desc">Forward radar and front stereo camera calibrated. 2 driver
+                                handovers logged over 24h due to low sun glare and faded lane lines.</div>
                         </div>
 
                         <div class="subsystem-card">
@@ -1201,7 +1254,8 @@
                                 <span class="alert-card-badge badge-healthy">Healthy</span>
                             </div>
                             <div class="subsystem-metric">13.8 V</div>
-                            <div class="subsystem-desc">DC-DC converter float charge nominal. Quiescent standby current drain is low (22 mA).</div>
+                            <div class="subsystem-desc">DC-DC converter float charge nominal. Quiescent standby current
+                                drain is low (22 mA).</div>
                         </div>
 
                     </div>
@@ -1210,15 +1264,19 @@
                     <div class="dashboard-card">
                         <div class="card-header-bar" style="margin-bottom:8px;">
                             <div class="card-title-group">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
                                 </svg>
                                 <span>Scheduled Maintenance & Service Forecast</span>
                             </div>
                             <span class="metric-tag-copper">Next Service: 25,000 km (in 6,580 km)</span>
                         </div>
                         <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">
-                            Vehicle is currently adhering to preventive maintenance schedule. Items scheduled for next service include: tyre rotation and balance check, cabin HEPA air filter replacement, brake fluid moisture test, and coolant loop specific gravity validation.
+                            Vehicle is currently adhering to preventive maintenance schedule. Items scheduled for next
+                            service include: tyre rotation and balance check, cabin HEPA air filter replacement, brake
+                            fluid moisture test, and coolant loop specific gravity validation.
                         </p>
                     </div>
 
@@ -1229,14 +1287,16 @@
                     <div class="view-header-bar">
                         <div class="view-title-group">
                             <div class="view-title">Cockpit & VehicleGPT Settings</div>
-                            <div class="view-subtitle">Telemetry preferences, units of measurement, threshold triggers, and offline AI engine</div>
+                            <div class="view-subtitle">Telemetry preferences, units of measurement, threshold triggers,
+                                and offline AI engine</div>
                         </div>
                         <div class="view-header-actions">
                             <button class="btn-action-copper" onclick="saveCockpitSettings()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                                    <polyline points="17 21 17 13 7 13 7 21"/>
-                                    <polyline points="7 3 7 8 15 8"/>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
                                 </svg>
                                 <span>Save Settings</span>
                             </button>
@@ -1248,8 +1308,9 @@
                         <!-- Panel 1: Telemetry & Simulation -->
                         <div class="settings-card">
                             <div class="settings-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                                 </svg>
                                 <span>Telemetry & Simulation</span>
                             </div>
@@ -1260,7 +1321,8 @@
                                     <div class="setting-sub">Switch active vehicle stress condition</div>
                                 </div>
                                 <div class="setting-control">
-                                    <select id="settingsScenarioSelect" class="setting-select" onchange="syncScenario(this.value)">
+                                    <select id="settingsScenarioSelect" class="setting-select"
+                                        onchange="syncScenario(this.value)">
                                         <option value="normal">Normal Driving</option>
                                         <option value="low_battery">Low Battery</option>
                                         <option value="overspeed">Over-speeding</option>
@@ -1274,7 +1336,8 @@
                                     <div class="setting-sub">Frequency of live data stream updates</div>
                                 </div>
                                 <div class="setting-control">
-                                    <select id="settingPollRate" class="setting-select" onchange="updatePollRate(this.value)">
+                                    <select id="settingPollRate" class="setting-select"
+                                        onchange="updatePollRate(this.value)">
                                         <option value="1000">1 Second (High Frequency)</option>
                                         <option value="3000" selected>3 Seconds (Standard)</option>
                                         <option value="5000">5 Seconds (Eco)</option>
@@ -1299,8 +1362,10 @@
                         <!-- Panel 2: Units & Display -->
                         <div class="settings-card">
                             <div class="settings-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
                                 </svg>
                                 <span>Units & Display</span>
                             </div>
@@ -1311,7 +1376,8 @@
                                     <div class="setting-sub">Switch between Dark Workstation and Light Theme</div>
                                 </div>
                                 <div class="setting-control">
-                                    <select id="settingThemeSelect" class="setting-select" onchange="applyTheme(this.value)">
+                                    <select id="settingThemeSelect" class="setting-select"
+                                        onchange="applyTheme(this.value)">
                                         <option value="dark">Dark Theme (Default)</option>
                                         <option value="light">Light Theme</option>
                                     </select>
@@ -1361,9 +1427,10 @@
                         <!-- Panel 3: Threshold Triggers -->
                         <div class="settings-card">
                             <div class="settings-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                 </svg>
                                 <span>Safety & Alert Thresholds</span>
                             </div>
@@ -1374,7 +1441,8 @@
                                     <div class="setting-sub">Triggers critical cooling alert</div>
                                 </div>
                                 <div class="setting-control">
-                                    <input type="number" class="setting-input" style="width:70px;" value="50.0" step="0.5">
+                                    <input type="number" class="setting-input" style="width:70px;" value="50.0"
+                                        step="0.5">
                                 </div>
                             </div>
 
@@ -1402,8 +1470,10 @@
                         <!-- Panel 4: On-Device AI Engine -->
                         <div class="settings-card">
                             <div class="settings-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--accent-copper)">
-                                    <path d="M12 2a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" color="var(--accent-copper)">
+                                    <path
+                                        d="M12 2a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4V4a2 2 0 0 1 2-2z" />
                                 </svg>
                                 <span>VehicleGPT On-Device AI</span>
                             </div>
@@ -1470,21 +1540,28 @@
 
                     <!-- Header Quick Navigation & Clear Controls -->
                     <div class="chat-header-actions">
-                        <button class="chat-action-btn" onclick="scrollChatToTop()" title="Scroll to top of chat" id="btnScrollTop">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <button class="chat-action-btn" onclick="scrollChatToTop()" title="Scroll to top of chat"
+                            id="btnScrollTop">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
                                 <polyline points="18 15 12 9 6 15" />
                             </svg>
                             <span>Top</span>
                         </button>
-                        <button class="chat-action-btn" onclick="clearChat()" title="Start fresh conversation" id="btnClearChat">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <button class="chat-action-btn" onclick="clearChat()" title="Start fresh conversation"
+                            id="btnClearChat">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             </svg>
                             <span>Clear</span>
                         </button>
-                        <button class="chat-action-btn" onclick="toggleChat(false)" title="Minimize VehicleGPT Assistant" id="btnMinimizeChat">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <button class="chat-action-btn" onclick="toggleChat(false)"
+                            title="Minimize VehicleGPT Assistant" id="btnMinimizeChat">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
                             <span>Min</span>
@@ -1503,8 +1580,10 @@
                 </div>
 
                 <!-- Floating Jump to Latest Button -->
-                <button class="chat-floating-jump" id="chatJumpBtn" onclick="scrollChatToBottom()" title="Jump to newest message">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <button class="chat-floating-jump" id="chatJumpBtn" onclick="scrollChatToBottom()"
+                    title="Jump to newest message">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
                         <polyline points="6 9 12 15 18 9" />
                     </svg>
                     <span>Latest</span>
@@ -1515,20 +1594,31 @@
                     <div class="suggestions-header-row">
                         <span class="suggestions-label">Try asking</span>
                         <div class="suggestions-controls">
-                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(-140)" title="Scroll left" aria-label="Scroll left">‹</button>
-                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(140)" title="Scroll right" aria-label="Scroll right">›</button>
-                            <button class="suggestions-toggle-btn" id="toggleSuggestionsBtn" onclick="toggleSuggestions()">Hide</button>
+                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(-140)"
+                                title="Scroll left" aria-label="Scroll left">‹</button>
+                            <button class="suggestions-nav-btn" onclick="scrollSuggestionsTrack(140)"
+                                title="Scroll right" aria-label="Scroll right">›</button>
+                            <button class="suggestions-toggle-btn" id="toggleSuggestionsBtn"
+                                onclick="toggleSuggestions()">Hide</button>
                         </div>
                     </div>
                     <div class="suggestions-scroll-track" id="suggestionsContainer">
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">How is my battery doing?</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show yesterday's alerts</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Why did battery overheat?</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Compare city vs highway</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Battery temperature trend</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Are there any tyre pressure anomalies?</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show ADAS disengagement events</button>
-                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Explain DTC P0A7E code</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">How is my battery
+                            doing?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show yesterday's
+                            alerts</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Why did battery
+                            overheat?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Compare city vs
+                            highway</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Battery temperature
+                            trend</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Are there any tyre
+                            pressure anomalies?</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Show ADAS disengagement
+                            events</button>
+                        <button class="suggestion-chip" onclick="askQuestion(this.textContent)">Explain DTC P0A7E
+                            code</button>
                     </div>
                 </div>
 
@@ -1551,18 +1641,21 @@
         </div>
 
         <!-- ================= Floating Round Chatbot Button (Bottom Right) ================= -->
-        <button class="chat-floating-fab" id="chatFloatingFab" onclick="toggleChat()" title="VehicleGPT AI Assistant (Click to open / minimize)" aria-label="Open or minimize VehicleGPT chatbot">
+        <button class="chat-floating-fab" id="chatFloatingFab" onclick="toggleChat()"
+            title="VehicleGPT AI Assistant (Click to open / minimize)" aria-label="Open or minimize VehicleGPT chatbot">
             <div class="fab-pulse-ring"></div>
             <div class="fab-icon-wrap">
                 <!-- Chatbot Icon (Visible when chat is minimized) -->
-                <svg class="fab-icon-chat" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="fab-icon-chat" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     <circle cx="9" cy="10" r="1.2" fill="currentColor"></circle>
                     <circle cx="15" cy="10" r="1.2" fill="currentColor"></circle>
                     <path d="M9.5 13.5c.8.6 2.2.6 3 0" stroke-width="1.5"></path>
                 </svg>
                 <!-- Close / Minimize Icon (Visible when chat is open) -->
-                <svg class="fab-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="fab-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -2255,7 +2348,7 @@
 
             try {
                 localStorage.setItem('vehicle_theme', isLight ? 'light' : 'dark');
-            } catch (e) {}
+            } catch (e) { }
 
             // Update Header Toggle Button
             const toggleBtn = document.getElementById('themeToggleBtn');
@@ -2392,7 +2485,7 @@
             }
             try {
                 localStorage.setItem('vehicle_sidebar_collapsed', targetState ? 'true' : 'false');
-            } catch (e) {}
+            } catch (e) { }
             setTimeout(resizeAllCharts, 360);
         }
 
@@ -2522,7 +2615,7 @@
 
         function clearChat() {
             if (activeInlineChart) {
-                try { activeInlineChart.destroy(); } catch (e) {}
+                try { activeInlineChart.destroy(); } catch (e) { }
                 activeInlineChart = null;
             }
             chatLog.innerHTML = `
@@ -2697,7 +2790,7 @@
                         botBubble.appendChild(chartBox);
 
                         if (activeInlineChart) {
-                            try { activeInlineChart.destroy(); } catch (e) {}
+                            try { activeInlineChart.destroy(); } catch (e) { }
                         }
 
                         activeInlineChart = new Chart(canvas, {
@@ -2782,14 +2875,14 @@
             try {
                 const savedTheme = localStorage.getItem('vehicle_theme') || 'dark';
                 applyTheme(savedTheme);
-            } catch (e) {}
+            } catch (e) { }
 
             // Restore saved sidebar collapsed state
             try {
                 if (localStorage.getItem('vehicle_sidebar_collapsed') === 'true') {
                     document.querySelector('.app-container').classList.add('sidebar-collapsed');
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             initMasterCharts();
             initAnalyticsCharts();
